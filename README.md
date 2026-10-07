@@ -1,4 +1,4 @@
-<h1 align="center">🎵 Concerts Tracker - SIG Web de Eventos Musicales</h1>
+<h1 align="center">🎵 Concerts Tracker - Web de Eventos Musicales</h1>
 
 <div align="center">
     <a href="https://github.com/agussantinelli/concerts-tracker" target="_blank" style="text-decoration: none;">
