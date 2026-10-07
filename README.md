@@ -17,11 +17,11 @@
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Badge"/>
-    <img src="https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite Badge"/>
-    <img src="https://img.shields.io/badge/Leaflet-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet Badge"/>
-    <img src="https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm Badge"/>
-    <img src="https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Badge"/>
+    <img src="https://img.shields.io/badge/React%2019.3.0-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Badge"/>
+    <img src="https://img.shields.io/badge/Vite%205.4.21-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite Badge"/>
+    <img src="https://img.shields.io/badge/Leaflet%201.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet Badge"/>
+    <img src="https://img.shields.io/badge/pnpm%2010.30.3-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm Badge"/>
+    <img src="https://img.shields.io/badge/Node.js%20v22.11.0-43853D?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js Badge"/>
 </p>
 <p align="center">
     <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5 Badge"/>
