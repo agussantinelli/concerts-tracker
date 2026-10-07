@@ -47,7 +47,8 @@ El flujo de trabajo estará orientado al desarrollo de software y consumo de ser
 ## 5. Integración con otras tecnologías
 A diferencia de un SIG de escritorio tradicional, este proyecto ya nace como una plataforma web integrada:
 * **APIs Web:** Integración directa con proveedores de datos de terceros vía REST (fetch/Axios).
-* **Propuesta a futuro (Bases de Datos Espaciales):** La arquitectura podría escalar hacia un backend propio utilizando bases de datos relacionales espaciales (como **PostgreSQL + PostGIS**) para almacenar un histórico de conciertos consultados, permitiendo análisis geoespaciales más complejos (clústers, áreas de influencia de recintos, etc.) sin depender de los límites de peticiones (*rate limits*) de las APIs públicas.
+* **Propuesta a futuro (Bases de Datos Espaciales):** La arquitectura podría escalar hacia un backend propio utilizando bases de datos relacionales espaciales (como **PostgreSQL + PostGIS**) para almacenar un histórico de conciertos consultados.
+  > ⚠️ **INCÓGNITA A DEFINIR - Uso de Base de Datos (BDD):** Aún debemos acordar si en esta versión inicial nos limitaremos exclusivamente al consumo de APIs en tiempo real o si introduciremos una Base de Datos propia para persistir información y optimizar el sistema.
 
 ---
 
