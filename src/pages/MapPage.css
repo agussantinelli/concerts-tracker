@@ -156,3 +156,23 @@
   color: var(--text-muted);
   font-size: 0.8rem;
 }
+
+/* Responsive adjustments for MapPage */
+@media (max-width: 768px) {
+  .map-page-layout {
+    flex-direction: column-reverse;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 50%;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
+  }
+
+  .map-container-wrapper {
+    width: 100%;
+    height: 50%;
+  }
+}
