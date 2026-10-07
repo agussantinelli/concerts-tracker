@@ -75,8 +75,13 @@
   <tbody>
    <tr>
     <td><strong>Frontend Web</strong></td>
-    <td>React + Vite</td>
-    <td>React v19, Vite v5 (SPA Rápida)</td>
+    <td>React + Vite + TypeScript</td>
+    <td>React v19, Vite v5 con tipado estático fuerte.</td>
+   </tr>
+   <tr>
+    <td><strong>Enrutamiento y UI</strong></td>
+    <td>React Router + React Icons</td>
+    <td>Navegación SPA y librería estándar de SVG.</td>
    </tr>
    <tr>
     <td><strong>Gestor de Paquetes</strong></td>
