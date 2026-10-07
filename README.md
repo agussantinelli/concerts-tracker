@@ -96,13 +96,13 @@
    </tr>
    <tr>
     <td><strong>Consumo de Datos</strong></td>
-    <td>APIs REST <em>(A definir)</em></td>
-    <td>Integración asíncrona de datos de eventos (Ej. Ticketmaster, Setlist.fm).</td>
+    <td>Arrays Estáticos (Local)</td>
+    <td>Los datos de eventos se gestionan desde memoria (hardcodeados) en esta etapa.</td>
    </tr>
    <tr>
-    <td><strong>Procesamiento de Datos</strong></td>
-    <td>Fetch / API Nativas</td>
-    <td>Transformación de JSONs en objetos espaciales renderizables.</td>
+    <td><strong>Despliegue Continuo (CI/CD)</strong></td>
+    <td>GitHub Actions + GitHub Pages</td>
+    <td>Pipeline automatizado para el despliegue del proyecto al hacer push.</td>
    </tr>
   </tbody>
  </table>
@@ -126,10 +126,10 @@
              <li>Adopta por defecto el sistema de proyección Web Mercator (EPSG: 3857).</li>
          </ul>
      </li>
-     <li><strong>Capa de Integración de Datos:</strong>
+     <li><strong>Capa de Procesamiento Local:</strong>
          <ul>
-             <li>Consumo en tiempo real de APIs de terceros mediante peticiones asincrónicas.</li>
-             <li>Conversión on-the-fly de objetos crudos en marcadores de mapa o formatos espaciales.</li>
+             <li>Uso de Hooks de React (useMemo, useState) para filtrado reactivo simultáneo.</li>
+             <li>Conversión on-the-fly de estructuras de objetos (arrays estáticos) en popups detallados y marcadores de mapa.</li>
          </ul>
      </li>
  </ul>
@@ -139,15 +139,16 @@
 <h2>📂 Estructura del Proyecto</h2>
 
 <pre><code>concerts-tracker/
+├── .github/workflows/       # Scripts de automatización CI/CD (GitHub Actions)
 ├── docs/                    # Documentación del proyecto
 │   ├── ENUNCIADO.md         # Enunciado original del TP
 │   ├── PROPOSAL.md          # Propuesta formal y objetivos del proyecto
 ├── public/                  # Recursos públicos estáticos
 ├── src/                     # Código Fuente de la Aplicación
-│   ├── assets/              # Imágenes e íconos locales
-│   ├── App.tsx              # Componente principal de React
-│   ├── index.css            # Estilos globales de la landing page
-│   └── main.tsx             # Punto de entrada de la aplicación
+│   ├── pages/               # Vistas principales (Home, MapPage) y sus estilos CSS
+│   ├── App.tsx              # Componente enrutador principal (HashRouter)
+│   ├── index.css            # Estilos globales de la aplicación y tokens (colores)
+│   └── main.tsx             # Punto de entrada y montaje de React
 ├── index.html               # Plantilla HTML principal
 ├── package.json             # Dependencias del proyecto y scripts
 ├── pnpm-lock.yaml           # Archivo de bloqueo de versiones de pnpm
@@ -173,10 +174,10 @@
             <li>Pop-ups con información rica: nombre del evento, fecha, lugar, y accesos directos.</li>
         </ul>
     </li>
-    <li><strong>Geofiltros y Filtrado de Atributos</strong>
+    <li><strong>Geofiltros y Filtrado Simultáneo</strong>
         <ul>
-            <li>Barra de búsqueda para localizar giras de artistas o bandas específicas.</li>
-            <li>Herramientas para delimitar la búsqueda en base al <em>bounding box</em> actual de la pantalla.</li>
+            <li>Panel lateral (Sidebar) reactivo para filtrar por Artista y Recinto (Venue) en tiempo real.</li>
+            <li>El mapa responde de manera inmediata mostrando u ocultando eventos según las coincidencias.</li>
         </ul>
     </li>
 </ul>
@@ -189,7 +190,6 @@
 <ul>
     <li><strong>Node.js</strong> instalado en tu sistema.</li>
     <li><strong>pnpm</strong> instalado globalmente (si no lo tenés, ejecutá <code>npm install -g pnpm</code>).</li>
-    <li><em>(En el futuro)</em> Claves de API de los proveedores de eventos seleccionados.</li>
 </ul>
 
 <h3>2. Instalación y Ejecución</h3>
