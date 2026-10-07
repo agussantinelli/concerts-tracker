@@ -29,8 +29,7 @@ En este apartado se utilizarán datos dinámicos consumidos mediante servicios w
 
 * **Datos de Mapas Base:** OpenStreetMap (OSM) será utilizado como la cartografía base de la plataforma.
 * **Datos de Eventos Musicales:** 
-  > ⚠️ **INCÓGNITA A DEFINIR - API de Conciertos:** Falta definir qué API o proveedor de datos se utilizará para extraer la información (artista, venue, latitud, longitud, fecha). 
-  > *Opciones posibles a investigar:* Ticketmaster API, Songkick API, Bandsintown API, SeatGeek API, o Setlist.fm API.
+  Para esta primera etapa, la información de los conciertos (artista, recinto, coordenadas, fecha) se implementará de manera estática (hardcodeada) mediante arreglos dentro del código fuente. Se pospone la integración de APIs externas para iteraciones posteriores.
 
 ---
 
@@ -38,8 +37,7 @@ En este apartado se utilizarán datos dinámicos consumidos mediante servicios w
 El flujo de trabajo estará orientado al desarrollo de software y consumo de servicios (frontend y web mapping).
 
 * **Desarrollo del Entorno:** Se utilizará un stack basado en Node.js, gestor de paquetes `pnpm`, **React** (creado con Vite) para la interfaz de usuario, y **Leaflet** (`react-leaflet`) para el motor de renderizado del mapa.
-* **Proyección Cartográfica:**
-  > ⚠️ **INCÓGNITA A DEFINIR - Sistema de Proyección:** Es necesario definir el Sistema de Referencia de Coordenadas (CRS) que mejor se adapte. Si bien Leaflet utiliza por defecto **Web Mercator (EPSG: 3857)** (ideal para mapas interactivos a nivel de calles y ciudades), se deberá evaluar si, para el análisis del alcance geográfico de giras mundiales, es pertinente considerar proyecciones que conserven el área (ej. proyecciones equivalentes), o si la representación por defecto es suficiente para los fines del proyecto.
+* **Proyección Cartográfica:** Se empleará el sistema de proyección por defecto de Leaflet, **Web Mercator (EPSG: 3857)**. Se adoptó esta opción por practicidad, comodidad y por ser el estándar predominante en los ecosistemas de mapas interactivos web.
 * **Geoprocesamiento y Filtrado:** El análisis no se hará en QGIS, sino en el cliente web. Se implementarán filtros por atributos (nombre de la banda) y espaciales (eventos dentro de un *bounding box* de la vista actual del mapa o dentro de un radio de influencia).
 
 ---
@@ -47,8 +45,7 @@ El flujo de trabajo estará orientado al desarrollo de software y consumo de ser
 ## 5. Integración con otras tecnologías
 A diferencia de un SIG de escritorio tradicional, este proyecto ya nace como una plataforma web integrada:
 * **APIs Web:** Integración directa con proveedores de datos de terceros vía REST (fetch/Axios).
-* **Propuesta a futuro (Bases de Datos Espaciales):** La arquitectura podría escalar hacia un backend propio utilizando bases de datos relacionales espaciales (como **PostgreSQL + PostGIS**) para almacenar un histórico de conciertos consultados.
-  > ⚠️ **INCÓGNITA A DEFINIR - Uso de Base de Datos (BDD):** Aún debemos acordar si en esta versión inicial nos limitaremos exclusivamente al consumo de APIs en tiempo real o si introduciremos una Base de Datos propia para persistir información y optimizar el sistema.
+* **Almacenamiento y Persistencia (Sin BDD):** Para la versión actual, se ha decidido no emplear una base de datos externa ni un backend. Todo el conjunto de marcadores y eventos operará directamente en memoria a partir de arreglos en el frontend. En el futuro, la arquitectura podría evolucionar hacia el uso de motores como **PostgreSQL + PostGIS** si los requerimientos de persistencia lo exigen.
 
 ---
 
