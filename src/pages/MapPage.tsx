@@ -21,12 +21,19 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+const venues = [
+  { id: 1, name: 'Anfiteatro Municipal Humberto de Nito', pos: [-32.9556, -60.6234] as [number, number] },
+  { id: 2, name: 'Bioceres Arena (ex Vorterix)', pos: [-32.9379, -60.6698] as [number, number] },
+  { id: 3, name: 'Salón Metropolitano', pos: [-32.9248, -60.6722] as [number, number] },
+  { id: 4, name: 'Teatro El Círculo', pos: [-32.9526, -60.6359] as [number, number] },
+];
+
 function MapPage() {
   const rosarioPosition: [number, number] = [-32.9468, -60.6393]; // UTN FRRO approx
 
   return (
     <div className="map-page-container">
-      <header className="header" style={{ padding: '20px 5%', background: 'var(--bg-dark)', maxWidth: '100%' }}>
+      <header className="header" style={{ padding: '20px 5%', background: 'var(--bg-dark)', maxWidth: '100%', boxSizing: 'border-box' }}>
         <h1 className="logo" style={{ fontSize: '1.2rem' }}>Concerts Tracker - Mapa</h1>
         <nav className="nav">
           <Link to="/">
@@ -43,9 +50,17 @@ function MapPage() {
           />
           <Marker position={rosarioPosition}>
             <Popup>
-              ¡Bienvenido a Rosario! <br /> Cuna del Rock Nacional.
+              ¡Bienvenido a Rosario! <br /> Centro de la ciudad.
             </Popup>
           </Marker>
+          {venues.map((venue) => (
+            <Marker key={venue.id} position={venue.pos}>
+              <Popup>
+                📍 <strong>{venue.name}</strong><br />
+                Punto frecuente de recitales.
+              </Popup>
+            </Marker>
+          ))}
         </MapContainer>
       </div>
     </div>

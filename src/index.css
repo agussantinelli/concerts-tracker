@@ -83,6 +83,7 @@ body {
   margin: 0;
   background: linear-gradient(90deg, #fff, var(--violet-light));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -163,6 +164,7 @@ body {
   margin-bottom: 24px;
   background: linear-gradient(135deg, #ffffff 0%, var(--violet-light) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
