@@ -31,16 +31,31 @@ const venues = [
 ];
 
 const mockEvents = [
-  { id: 101, artist: 'Fito Páez', date: '2027-03-15', venueId: 1, genre: 'Rock Nacional' },
-  { id: 102, artist: 'Wos', date: '2027-04-02', venueId: 3, genre: 'Hip Hop / Trap' },
-  { id: 103, artist: 'Duki', date: '2027-05-10', venueId: 3, genre: 'Trap' },
-  { id: 104, artist: 'Babasonicos', date: '2027-06-20', venueId: 1, genre: 'Rock Alternativo' },
-  { id: 105, artist: 'Conociendo Rusia', date: '2027-04-18', venueId: 2, genre: 'Pop Rock' },
-  { id: 106, artist: 'Divididos', date: '2027-08-11', venueId: 1, genre: 'Rock' },
-  { id: 107, artist: 'Abel Pintos', date: '2027-09-05', venueId: 3, genre: 'Pop / Folclore' },
-  { id: 108, artist: 'Jorge Drexler', date: '2027-10-12', venueId: 4, genre: 'Cantautor' },
-  { id: 109, artist: 'Bandalos Chinos', date: '2027-07-08', venueId: 2, genre: 'Indie Pop' },
-  { id: 110, artist: 'Los Palmeras', date: '2027-11-20', venueId: 1, genre: 'Cumbia' },
+  // Anfiteatro Municipal
+  { id: 101, artist: 'Ciro y los Persas', date: '2026-11-06', venueId: 1, genre: 'Rock Nacional' },
+  { id: 102, artist: 'Abel Pintos', date: '2026-11-28', venueId: 1, genre: 'Pop / Folclore' },
+  { id: 103, artist: 'Serú Girán (Homenaje)', date: '2026-12-07', venueId: 1, genre: 'Rock Nacional' },
+  { id: 104, artist: 'Babasónicos', date: '2026-12-11', venueId: 1, genre: 'Rock Alternativo' },
+  { id: 105, artist: 'La K\'onga', date: '2027-02-13', venueId: 1, genre: 'Cuarteto' },
+
+  // Bioceres Arena (ex Vorterix)
+  { id: 106, artist: 'Angela Torres', date: '2026-10-23', venueId: 2, genre: 'Pop' },
+  { id: 107, artist: 'Sergio Dalma', date: '2026-10-30', venueId: 2, genre: 'Balada / Pop' },
+  { id: 108, artist: 'Ke Personajes', date: '2026-10-31', venueId: 2, genre: 'Cumbia' },
+  { id: 109, artist: 'Alex Ubago', date: '2026-11-14', venueId: 2, genre: 'Pop Romántico' },
+
+  // Salón Metropolitano
+  { id: 110, artist: 'CamelPhat', date: '2026-10-09', venueId: 3, genre: 'Electrónica' },
+  { id: 111, artist: 'Los Pericos', date: '2026-10-17', venueId: 3, genre: 'Reggae' },
+  { id: 112, artist: 'David Bisbal', date: '2026-10-18', venueId: 3, genre: 'Pop Latino' },
+  { id: 113, artist: 'Camilo', date: '2026-10-30', venueId: 3, genre: 'Pop Latino' },
+  { id: 114, artist: 'Ha*Ash', date: '2027-03-12', venueId: 3, genre: 'Pop / Country' },
+  { id: 115, artist: 'Nonpalidece', date: '2027-03-26', venueId: 3, genre: 'Reggae' },
+
+  // Teatro El Círculo
+  { id: 116, artist: 'Dyango', date: '2026-10-16', venueId: 4, genre: 'Romántico' },
+  { id: 117, artist: 'Pedro Aznar', date: '2026-11-15', venueId: 4, genre: 'Rock / Fusión' },
+  { id: 118, artist: 'Sergio Torres', date: '2027-04-18', venueId: 4, genre: 'Cumbia Santafesina' },
 ];
 
 function MapPage() {
