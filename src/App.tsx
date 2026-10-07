@@ -4,45 +4,45 @@ import './index.css';
 function App() {
   return (
     <div className="landing-container">
-      {/* Subtle Background Effects */}
+      {/* Efectos Sutiles de Fondo */}
       <div className="bg-glow"></div>
       <div className="bg-glow bg-glow-secondary"></div>
       
       <header className="header">
         <h1 className="logo">Concerts Tracker</h1>
         <nav className="nav">
-          <a href="#features">Features</a>
-          <a href="#about">About</a>
-          <button className="btn-primary">Launch App</button>
+          <a href="#features">Características</a>
+          <a href="#about">Acerca de</a>
+          <button className="btn-primary">Abrir App</button>
         </nav>
       </header>
 
       <main className="hero">
-        <h2 className="hero-title">Experience Music.<br/> Map the Journey.</h2>
+        <h2 className="hero-title">Viví la Música.<br/> Mapeá el Viaje.</h2>
         <p className="hero-subtitle">
-          Discover, track, and visualize live concerts globally. See the geographical reach of your favorite artists in real-time, right on the map.
+          Descubrí, seguí y visualizá conciertos en vivo a nivel global. Observá el alcance geográfico de tus artistas favoritos en tiempo real, directo en el mapa.
         </p>
         <div className="cta-group">
-          <button className="btn-primary large">Start Exploring</button>
-          <button className="btn-secondary large">View Documentation</button>
+          <button className="btn-primary large">Empezar a Explorar</button>
+          <button className="btn-secondary large">Ver Documentación</button>
         </div>
       </main>
 
       <section className="features-grid" id="features">
         <div className="feature-card">
           <div className="feature-icon">🗺️</div>
-          <h3>Global Mapping</h3>
-          <p>Interactive spatial mapping powered by OpenStreetMap & Leaflet. Zoom into any city in the world.</p>
+          <h3>Mapeo Global</h3>
+          <p>Mapeo espacial interactivo impulsado por OpenStreetMap y Leaflet. Hacé zoom en cualquier ciudad del mundo.</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon">🔍</div>
-          <h3>Dynamic Filters</h3>
-          <p>Filter tours by band, location, or bounding box effortlessly to find exactly what you are looking for.</p>
+          <h3>Filtros Dinámicos</h3>
+          <p>Filtrá giras por banda, ubicación o área delimitada sin esfuerzo para encontrar exactamente lo que buscás.</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon">⚡</div>
-          <h3>Real-time Data</h3>
-          <p>Consume live APIs to stay updated on the latest concerts, ticket availability and tour announcements.</p>
+          <h3>Datos en Tiempo Real</h3>
+          <p>Consumí APIs en tiempo real para mantenerte al día con los últimos conciertos, disponibilidad de entradas y anuncios de giras.</p>
         </div>
       </section>
     </div>

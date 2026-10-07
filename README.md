@@ -18,6 +18,7 @@
 
 <p align="center">
     <img src="https://img.shields.io/badge/React-19.3.0-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Badge"/>
+    <img src="https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript Badge"/>
     <img src="https://img.shields.io/badge/Vite-5.4.21-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E" alt="Vite Badge"/>
     <img src="https://img.shields.io/badge/Leaflet-1.9.4-199900?style=for-the-badge&logo=leaflet&logoColor=white" alt="Leaflet Badge"/>
     <img src="https://img.shields.io/badge/pnpm-10.30.3-F69220?style=for-the-badge&logo=pnpm&logoColor=white" alt="pnpm Badge"/>
@@ -135,12 +136,12 @@
 ├── public/                  # Recursos públicos estáticos
 ├── src/                     # Código Fuente de la Aplicación
 │   ├── assets/              # Imágenes e íconos locales
-│   ├── App.jsx              # Componente principal de React
-│   └── main.jsx             # Punto de entrada de la aplicación
+│   ├── App.tsx              # Componente principal de React
+│   └── main.tsx             # Punto de entrada de la aplicación
 ├── index.html               # Plantilla HTML principal
 ├── package.json             # Dependencias del proyecto y scripts
 ├── pnpm-lock.yaml           # Archivo de bloqueo de versiones de pnpm
-├── vite.config.js           # Configuración del entorno Vite
+├── vite.config.ts           # Configuración del entorno Vite
 ├── ENUNCIADO.md             # Enunciado original del TP
 ├── PROPOSAL.md              # Propuesta formal y objetivos del proyecto
 └── README.md                # Documentación principal del repositorio
