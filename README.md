@@ -29,7 +29,7 @@
     <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript Badge"/>
 </p>
 <div align="center">
-  <img src="https://img.shields.io/badge/License-GPLv3-blue.svg?style=for-the-badge&logo=gnu&logoColor=white" alt="GPLv3 License"/>
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="MIT License"/>
 </div>
 <hr>
 
@@ -221,8 +221,8 @@
 <h2 align="left">⚖️ Licencia</h2>
 
 <p align="left">
-  Este proyecto se distribuye bajo los términos de la <b>Licencia GNU General Public License v3.0 (GPLv3)</b>. 
-  Garantizando la libertad de uso, estudio, y modificación, siempre y cuando cualquier proyecto derivado mantenga este mismo tipo de licencia de código abierto.
+  Este proyecto se distribuye bajo los términos de la <b>Licencia MIT</b>. 
+  Permitiendo el uso comercial, la modificación, distribución y uso privado de forma libre y gratuita, requiriendo únicamente preservar el aviso de derechos de autor y licencia.
 </p>
 
 <hr />
