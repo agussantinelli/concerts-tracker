@@ -133,17 +133,21 @@
 <h2>📂 Estructura del Proyecto</h2>
 
 <pre><code>concerts-tracker/
+├── docs/                    # Documentación del proyecto
+│   ├── ENUNCIADO.md         # Enunciado original del TP
+│   ├── PROPOSAL.md          # Propuesta formal y objetivos del proyecto
 ├── public/                  # Recursos públicos estáticos
 ├── src/                     # Código Fuente de la Aplicación
 │   ├── assets/              # Imágenes e íconos locales
 │   ├── App.tsx              # Componente principal de React
+│   ├── index.css            # Estilos globales de la landing page
 │   └── main.tsx             # Punto de entrada de la aplicación
 ├── index.html               # Plantilla HTML principal
 ├── package.json             # Dependencias del proyecto y scripts
 ├── pnpm-lock.yaml           # Archivo de bloqueo de versiones de pnpm
+├── tsconfig.json            # Configuración del compilador TypeScript
+├── tsconfig.node.json       # Configuración TS específica para Vite
 ├── vite.config.ts           # Configuración del entorno Vite
-├── ENUNCIADO.md             # Enunciado original del TP
-├── PROPOSAL.md              # Propuesta formal y objetivos del proyecto
 └── README.md                # Documentación principal del repositorio
 </code></pre>
 
