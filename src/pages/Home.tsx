@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaMapMarkedAlt, FaSearch, FaBolt } from 'react-icons/fa';
 
 function Home() {
   return (
@@ -34,17 +35,17 @@ function Home() {
 
       <section className="features-grid" id="features">
         <div className="feature-card">
-          <div className="feature-icon">🗺️</div>
+          <div className="feature-icon"><FaMapMarkedAlt /></div>
           <h3>Mapeo Global</h3>
           <p>Mapeo espacial interactivo impulsado por OpenStreetMap y Leaflet. Hacé zoom en cualquier ciudad del mundo.</p>
         </div>
         <div className="feature-card">
-          <div className="feature-icon">🔍</div>
+          <div className="feature-icon"><FaSearch /></div>
           <h3>Filtros Dinámicos</h3>
           <p>Filtrá giras por banda, ubicación o área delimitada sin esfuerzo para encontrar exactamente lo que buscás.</p>
         </div>
         <div className="feature-card">
-          <div className="feature-icon">⚡</div>
+          <div className="feature-icon"><FaBolt /></div>
           <h3>Datos en Tiempo Real</h3>
           <p>Consumí APIs en tiempo real para mantenerte al día con los últimos conciertos, disponibilidad de entradas y anuncios de giras.</p>
         </div>

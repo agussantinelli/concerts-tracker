@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { FaMapMarkerAlt } from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 
 import L from 'leaflet';
@@ -41,7 +42,7 @@ function MapPage() {
           </Link>
         </nav>
       </header>
-      
+
       <div className="map-wrapper" style={{ height: 'calc(100vh - 80px)', width: '100%', position: 'relative', zIndex: 0 }}>
         <MapContainer center={rosarioPosition} zoom={13} style={{ height: '100%', width: '100%' }}>
           <TileLayer
@@ -56,7 +57,10 @@ function MapPage() {
           {venues.map((venue) => (
             <Marker key={venue.id} position={venue.pos}>
               <Popup>
-                📍 <strong>{venue.name}</strong><br />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  <FaMapMarkerAlt color="var(--violet-electric)" /> <strong>{venue.name}</strong>
+                </div>
+                <br />
                 Punto frecuente de recitales.
               </Popup>
             </Marker>
