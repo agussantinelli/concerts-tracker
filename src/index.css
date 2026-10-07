@@ -73,7 +73,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 30px 0;
-  z-index: 10;
+  position: relative;
+  z-index: 999;
 }
 
 .logo {
@@ -230,7 +231,7 @@ body {
   .hero-title {
     font-size: 2.8rem;
   }
-  .nav {
-    display: none; /* simple mobile nav hide for now */
+  .nav a {
+    display: none; /* Hide only links on mobile, keep buttons visible */
   }
 }
