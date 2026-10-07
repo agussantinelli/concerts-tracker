@@ -1,6 +1,6 @@
 # Proposal: Plataforma de Visualización de Conciertos (Concerts Tracker)
 
-A continuación, se detalla la propuesta del Trabajo Práctico Integrador, adaptada a la nueva temática sobre visualización geográfica de conciertos. Se destacan explícitamente las **incógnitas que aún deben definirse** en esta etapa de planificación.
+A continuación, se detalla la propuesta del Trabajo Práctico Integrador, adaptada a la nueva temática sobre visualización geográfica de conciertos. *(Nota: Todas las decisiones arquitectónicas e incógnitas iniciales ya han sido definidas y aplicadas al proyecto).*
 
 ---
 
@@ -38,22 +38,23 @@ El flujo de trabajo estará orientado al desarrollo de software y consumo de ser
 
 * **Desarrollo del Entorno:** Se utilizará un stack basado en Node.js, gestor de paquetes `pnpm`, **React** (creado con Vite) para la interfaz de usuario, y **Leaflet** (`react-leaflet`) para el motor de renderizado del mapa.
 * **Proyección Cartográfica:** Se empleará el sistema de proyección por defecto de Leaflet, **Web Mercator (EPSG: 3857)**. Se adoptó esta opción por practicidad, comodidad y por ser el estándar predominante en los ecosistemas de mapas interactivos web.
-* **Geoprocesamiento y Filtrado:** El análisis no se hará en QGIS, sino en el cliente web. Se implementarán filtros por atributos (nombre de la banda) y espaciales (eventos dentro de un *bounding box* de la vista actual del mapa o dentro de un radio de influencia).
+* **Filtrado y Visualización Reactiva:** El procesamiento no se hará en QGIS, sino de manera íntegra en el cliente web mediante un panel lateral de control. Se construyó un sistema de filtrado reactivo en tiempo real que permite cruzar simultáneamente criterios por atributos (búsqueda libre por nombre de banda/artista) y espaciales (desplegable para filtrar por recinto o venue). El mapa responde dinámicamente ocultando o mostrando los marcadores según las coincidencias.
 
 ---
 
 ## 5. Integración con otras tecnologías
 A diferencia de un SIG de escritorio tradicional, este proyecto ya nace como una plataforma web integrada:
-* **APIs Web:** Integración directa con proveedores de datos de terceros vía REST (fetch/Axios).
+* **APIs Web (Diferido):** La integración directa con proveedores de datos vía REST (fetch/Axios) se ha planteado como un objetivo a futuro, utilizando datos estáticos en la fase inicial.
+* **Despliegue Continuo (CI/CD):** La aplicación cuenta con un flujo de trabajo (Workflow) de GitHub Actions para compilación y despliegue automatizado en GitHub Pages mediante `HashRouter`.
 * **Almacenamiento y Persistencia (Sin BDD):** Para la versión actual, se ha decidido no emplear una base de datos externa ni un backend. Todo el conjunto de marcadores y eventos operará directamente en memoria a partir de arreglos en el frontend. En el futuro, la arquitectura podría evolucionar hacia el uso de motores como **PostgreSQL + PostGIS** si los requerimientos de persistencia lo exigen.
 
 ---
 
-## 6. Resultados (Entregables Esperados)
-* Una aplicación web (SPA - Single Page Application) funcional.
-* Mapas interactivos que exhiban marcadores de eventos en base a las búsquedas.
-* Elementos visuales que agrupen la densidad de conciertos (ej. *Marker Clustering*) si hay muchos eventos en una misma ciudad.
-* Interfaz intuitiva para ingresar parámetros de búsqueda.
+## 6. Resultados (Entregables Alcanzados y Esperados)
+* **Frontend SPA Funcional:** Aplicación web responsiva desarrollada con React, Vite y TypeScript, enrutada vía `HashRouter`.
+* **Mapa Interactivo:** Integración de Leaflet sobre OpenStreetMap, acompañado de un panel lateral (sidebar) glassmorphism con filtros simultáneos por Artista y Recinto.
+* **Despliegue en la Nube:** Proyecto montado y público en GitHub Pages de forma automatizada.
+* **Pendiente:** Implementación de *Marker Clustering* para agrupar visualmente la densidad de conciertos cuando el volumen de datos escale.
 
 ---
 
