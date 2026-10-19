@@ -176,3 +176,79 @@
     height: 50%;
   }
 }
+
+.api-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(138, 43, 226, 0.15);
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  color: #c084fc;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.api-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.venue-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--violet-light);
+  margin-bottom: 6px;
+}
+
+.source-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+
+.source-badge.bandsintown {
+  background: rgba(0, 180, 216, 0.15);
+  color: #00b4d8;
+  border: 1px solid rgba(0, 180, 216, 0.4);
+}
+
+.source-badge.musicbrainz {
+  background: rgba(235, 87, 87, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(235, 87, 87, 0.4);
+}
+
+.ticket-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  background: rgba(138, 43, 226, 0.25);
+  color: #e9d5ff;
+  border: 1px solid rgba(138, 43, 226, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-top: 6px;
+  transition: all 0.2s;
+}
+
+.ticket-link-btn:hover {
+  background: var(--violet-light);
+  color: #fff;
+}
+

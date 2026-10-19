@@ -1,7 +1,16 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { FaMapMarkerAlt, FaCalendarAlt, FaMusic, FaTicketAlt, FaFilter } from 'react-icons/fa';
+import { 
+  FaMapMarkerAlt, 
+  FaCalendarAlt, 
+  FaMusic, 
+  FaTicketAlt, 
+  FaFilter, 
+  FaBroadcastTower, 
+  FaSortAmountDownAlt,
+  FaExternalLinkAlt
+} from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
 
@@ -9,6 +18,9 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+
+import { Venue, ConcertEvent } from '../types';
+import { fetchLiveVenues, fetchLiveEvents } from '../services/concertsService';
 
 const DefaultIcon = L.icon({
   iconUrl: icon,
@@ -22,62 +34,79 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-// Hardcoded Data
-const venues = [
-  { id: 1, name: 'Anfiteatro Municipal Humberto de Nito', pos: [-32.9556, -60.6234] as [number, number] },
-  { id: 2, name: 'Bioceres Arena (ex Vorterix)', pos: [-32.9379, -60.6698] as [number, number] },
-  { id: 3, name: 'Salón Metropolitano', pos: [-32.9248, -60.6722] as [number, number] },
-  { id: 4, name: 'Teatro El Círculo', pos: [-32.9526, -60.6359] as [number, number] },
-];
-
-const mockEvents = [
-  // Anfiteatro Municipal
-  { id: 101, artist: 'Ciro y los Persas', date: '2026-11-06', venueId: 1, genre: 'Rock Nacional' },
-  { id: 102, artist: 'Abel Pintos', date: '2026-11-28', venueId: 1, genre: 'Pop / Folclore' },
-  { id: 103, artist: 'Serú Girán (Homenaje)', date: '2026-12-07', venueId: 1, genre: 'Rock Nacional' },
-  { id: 104, artist: 'Babasónicos', date: '2026-12-11', venueId: 1, genre: 'Rock Alternativo' },
-  { id: 105, artist: 'La K\'onga', date: '2027-02-13', venueId: 1, genre: 'Cuarteto' },
-
-  // Bioceres Arena (ex Vorterix)
-  { id: 106, artist: 'Angela Torres', date: '2026-10-23', venueId: 2, genre: 'Pop' },
-  { id: 107, artist: 'Sergio Dalma', date: '2026-10-30', venueId: 2, genre: 'Balada / Pop' },
-  { id: 108, artist: 'Ke Personajes', date: '2026-10-31', venueId: 2, genre: 'Cumbia' },
-  { id: 109, artist: 'Alex Ubago', date: '2026-11-14', venueId: 2, genre: 'Pop Romántico' },
-
-  // Salón Metropolitano
-  { id: 110, artist: 'CamelPhat', date: '2026-10-09', venueId: 3, genre: 'Electrónica' },
-  { id: 111, artist: 'Los Pericos', date: '2026-10-17', venueId: 3, genre: 'Reggae' },
-  { id: 112, artist: 'David Bisbal', date: '2026-10-18', venueId: 3, genre: 'Pop Latino' },
-  { id: 113, artist: 'Camilo', date: '2026-10-30', venueId: 3, genre: 'Pop Latino' },
-  { id: 114, artist: 'Ha*Ash', date: '2027-03-12', venueId: 3, genre: 'Pop / Country' },
-  { id: 115, artist: 'Nonpalidece', date: '2027-03-26', venueId: 3, genre: 'Reggae' },
-
-  // Teatro El Círculo
-  { id: 116, artist: 'Dyango', date: '2026-10-16', venueId: 4, genre: 'Romántico' },
-  { id: 117, artist: 'Pedro Aznar', date: '2026-11-15', venueId: 4, genre: 'Rock / Fusión' },
-  { id: 118, artist: 'Sergio Torres', date: '2027-04-18', venueId: 4, genre: 'Cumbia Santafesina' },
-];
-
 function MapPage() {
   const rosarioPosition: [number, number] = [-32.9468, -60.6393];
 
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [events, setEvents] = useState<ConcertEvent[]>([]);
+  const [isLiveApi, setIsLiveApi] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   const [artistFilter, setArtistFilter] = useState('');
   const [venueFilter, setVenueFilter] = useState('ALL');
+  
+  // Fecha actual (formato YYYY-MM-DD) para filtrar siempre conciertos a partir de hoy
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-  // Filter events based on criteria
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadDataFromApis() {
+      setLoading(true);
+      try {
+        // 1. Obtener recintos oficiales en tiempo real desde OpenStreetMap Nominatim (0% hardcoding)
+        const venuesResult = await fetchLiveVenues();
+        
+        // 2. Obtener eventos en tiempo real desde Bandsintown Live API unificados a recintos de OSM
+        const eventsResult = await fetchLiveEvents(venuesResult.venues);
+
+        if (isMounted) {
+          setVenues(venuesResult.venues);
+          setEvents(eventsResult.events);
+          setIsLiveApi(venuesResult.isLive);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error cargando fuentes de información espacial en tiempo real:', err);
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadDataFromApis();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Validación y filtrado reactivo de eventos:
+  // 1. Muestra SIEMPRE y ÚNICAMENTE recitales en el día de la fecha o posteriores
+  // 2. Ordena automáticamente en orden cronológico ascendente (el más próximo primero)
   const filteredEvents = useMemo(() => {
-    return mockEvents.filter(event => {
-      const matchArtist = event.artist.toLowerCase().includes(artistFilter.toLowerCase());
-      const matchVenue = venueFilter === 'ALL' || event.venueId.toString() === venueFilter;
-      return matchArtist && matchVenue;
-    });
-  }, [artistFilter, venueFilter]);
+    return events
+      .filter(event => {
+        // Validación estricta: sólo fechas posteriores o iguales a hoy
+        if (!event.date || event.date < today) {
+          return false;
+        }
 
-  // Derive which venues to show on the map (only venues that have matching events)
+        const matchArtist = event.artist.toLowerCase().includes(artistFilter.toLowerCase());
+        const matchVenue = venueFilter === 'ALL' || event.venueId.toString() === venueFilter;
+        return matchArtist && matchVenue;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [events, artistFilter, venueFilter, today]);
+
+  // Derivar qué recintos mostrar en la cartografía
   const activeVenues = useMemo(() => {
-    const activeIds = new Set(filteredEvents.map(e => e.venueId));
-    return venues.filter(v => activeIds.has(v.id));
-  }, [filteredEvents]);
+    if (venueFilter !== 'ALL') {
+      return venues.filter(v => v.id.toString() === venueFilter);
+    }
+    // Si el usuario filtró por artista, mostrar solo los recintos donde toca
+    if (artistFilter.trim()) {
+      const activeIds = new Set(filteredEvents.map(e => e.venueId.toString()));
+      return venues.filter(v => activeIds.has(v.id.toString()));
+    }
+    // Si no hay filtro de artista, mostrar todos los escenarios obtenidos de las APIs
+    return venues;
+  }, [venues, filteredEvents, venueFilter, artistFilter]);
 
   return (
     <div className="map-page-container">
@@ -95,8 +124,23 @@ function MapPage() {
         {/* Sidebar UI for Filters and List */}
         <aside className="sidebar">
           <div className="sidebar-header">
-            <h2><FaFilter size={18} style={{ marginRight: '8px' }}/> Filtros</h2>
-            <div className="filter-group">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2><FaFilter size={18} style={{ marginRight: '8px' }}/> Filtros</h2>
+              <span style={{ fontSize: '0.75rem', color: '#c084fc', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <FaSortAmountDownAlt size={12} /> Cronológico
+              </span>
+            </div>
+            
+            {/* Indicador de estado de las múltiples APIs en tiempo real */}
+            <div className="api-badge" title="Geoservicios y eventos conectados en tiempo real">
+              <span className="api-badge-dot" style={{ backgroundColor: isLiveApi ? '#22c55e' : '#f59e0b' }}></span>
+              <FaBroadcastTower size={12} />
+              <span>
+                {isLiveApi ? 'APIs en Vivo: OpenStreetMap + Bandsintown' : 'Conectando con APIs...'}
+              </span>
+            </div>
+
+            <div className="filter-group" style={{ marginTop: '14px' }}>
               <input 
                 type="text" 
                 className="filter-input" 
@@ -109,36 +153,72 @@ function MapPage() {
                 value={venueFilter}
                 onChange={(e) => setVenueFilter(e.target.value)}
               >
-                <option value="ALL">Todos los Recintos</option>
+                <option value="ALL">Todos los Recintos ({venues.length})</option>
                 {venues.map(v => (
-                  <option key={v.id} value={v.id}>{v.name}</option>
+                  <option key={v.id} value={v.id}>
+                    {v.name} {v.type ? `(${v.type})` : ''}
+                  </option>
                 ))}
               </select>
+
+            </div>
+
+            {/* Contador de resultados */}
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '10px' }}>
+              Mostrando {filteredEvents.length} recitales próximos en vivo
             </div>
           </div>
 
           <div className="sidebar-content">
-            {filteredEvents.length === 0 ? (
+            {loading ? (
               <div className="no-results">
-                No se encontraron recitales con esos filtros.
+                Consultando APIs en tiempo real (Bandsintown, MusicBrainz & OpenStreetMap)...
+              </div>
+            ) : filteredEvents.length === 0 ? (
+              <div className="no-results">
+                <p>No se encontraron conciertos programados a partir del día de la fecha.</p>
               </div>
             ) : (
               filteredEvents.map(event => {
-                const venue = venues.find(v => v.id === event.venueId);
+                const venue = venues.find(v => v.id.toString() === event.venueId.toString());
+                const isBandsintown = event.source === 'Bandsintown';
                 return (
                   <div key={event.id} className="event-card">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      {venue?.type && (
+                        <span className="venue-tag">{venue.type}</span>
+                      )}
+                      <span className={`source-badge ${isBandsintown ? 'bandsintown' : 'musicbrainz'}`}>
+                        {event.source || 'API'}
+                      </span>
+                    </div>
+
                     <h3 className="event-artist">{event.artist}</h3>
+
+
                     <div className="event-details">
                       <div className="event-details-row">
-                        <FaMapMarkerAlt color="var(--violet-electric)" /> {venue?.name}
+                        <FaMapMarkerAlt color="var(--violet-electric)" /> {venue?.name || event.venueName || 'Recinto'}
                       </div>
                       <div className="event-details-row">
-                        <FaCalendarAlt color="var(--violet-electric)" /> {new Date(event.date).toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        <FaCalendarAlt color="var(--violet-electric)" /> {event.date ? new Date(event.date + 'T00:00:00').toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha a confirmar'}
                       </div>
                       <div className="event-details-row">
                         <FaMusic color="var(--violet-electric)" /> {event.genre}
                       </div>
                     </div>
+
+                    {event.ticketUrl && (
+                      <a 
+                        href={event.ticketUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="ticket-link-btn"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <FaTicketAlt size={10} /> Entradas oficiales <FaExternalLinkAlt size={8} />
+                      </a>
+                    )}
                   </div>
                 );
               })
@@ -155,24 +235,55 @@ function MapPage() {
             />
             
             {activeVenues.map((venue) => {
-              // Find events for this specific venue
-              const venueEvents = filteredEvents.filter(e => e.venueId === venue.id);
+              // Encuentra eventos para este recinto específico, ordenados por fecha
+              const venueEvents = filteredEvents
+                .filter(e => e.venueId.toString() === venue.id.toString())
+                .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
               
               return (
                 <Marker key={venue.id} position={venue.pos}>
                   <Popup className="custom-popup">
                     <div className="popup-venue-name">
-                      <FaMapMarkerAlt /> {venue.name}
+                      <FaMapMarkerAlt style={{ marginRight: '6px' }} /> {venue.name}
                     </div>
-                    {venueEvents.map(ev => (
-                      <div key={ev.id} className="popup-event-item">
-                        <div className="popup-event-artist">{ev.artist}</div>
-                        <div className="popup-event-date">{new Date(ev.date).toLocaleDateString('es-AR')} - {ev.genre}</div>
+                    {venue.type && (
+                      <div style={{ marginBottom: '4px' }}>
+                        <span className="venue-tag">{venue.type}</span>
+                        <span className="source-badge bandsintown" style={{ marginLeft: '4px' }}>
+                          OpenStreetMap
+                        </span>
                       </div>
-                    ))}
-                    <button className="btn-primary" style={{ width: '100%', marginTop: '10px', padding: '6px', fontSize: '0.9rem' }}>
-                      <FaTicketAlt style={{ marginRight: '5px' }}/> Ver Entradas
-                    </button>
+                    )}
+                    {venue.address && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
+                        📍 {venue.address}
+                      </div>
+                    )}
+                    {venueEvents.length > 0 ? (
+                      venueEvents.map(ev => (
+                        <div key={ev.id} className="popup-event-item">
+                          <div className="popup-event-artist">{ev.artist}</div>
+                          <div className="popup-event-date">
+                            {ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('es-AR') : ''} - {ev.genre}
+                          </div>
+                          {ev.ticketUrl && (
+                            <a 
+                              href={ev.ticketUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className="ticket-link-btn"
+                              style={{ marginTop: '4px', display: 'inline-flex' }}
+                            >
+                              <FaTicketAlt size={10} /> Entradas <FaExternalLinkAlt size={8} />
+                            </a>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                        Recinto oficial obtenido en tiempo real desde OpenStreetMap.
+                      </div>
+                    )}
                   </Popup>
                 </Marker>
               );
