@@ -30,6 +30,11 @@
     <img src="https://img.shields.io/badge/React_Router-7.18.4-CA4245?style=for-the-badge&logo=reactrouter&logoColor=white" alt="React Router Badge"/>
     <img src="https://img.shields.io/badge/React_Icons-5.7.0-E91E63?style=for-the-badge&logo=react&logoColor=white" alt="React Icons Badge"/>
 </p>
+<p align="center">
+    <img src="https://img.shields.io/badge/OpenStreetMap-Cartografía_y_Tiles-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="OpenStreetMap Badge"/>
+    <img src="https://img.shields.io/badge/Photon_OSM-Geocodificación_en_Vivo-5C2D91?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="Photon OSM Badge"/>
+    <img src="https://img.shields.io/badge/Bandsintown-Live_Concerts_API-00B4D8?style=for-the-badge&logo=bandsintown&logoColor=white" alt="Bandsintown Badge"/>
+</p>
 <div align="center">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="MIT License"/>
 </div>
