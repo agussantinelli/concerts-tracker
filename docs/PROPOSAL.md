@@ -43,9 +43,15 @@ El sistema articula capas cartográficas digitales base con fuentes de datos de 
     * *Formato y Tipo:* Vectorial puntual en JSON. Provee nombre del recinto, dirección catastral, tipología (Estadio, Arena, Anfiteatro, Concert Hall, Club) y coordenadas geodésicas oficiales (`latitude`, `longitude` en EPSG:4326).
   * **Fuente Secundaria / Validación SIG:** **OpenStreetMap Nominatim / Overpass API**, empleada para validación de geometrías de equipamiento cultural y recreativo (`amenity=theatre`, `leisure=stadium`).
 
-* **Datos Temáticos de Eventos Musicales (Conciertos):**
-  * **Fuente Primaria:** **Setlist.fm REST API** (plataforma comunitaria de Live Nation) complementada con la API de eventos de **MusicBrainz**.
-  * **Formato y Tipo:** Datos alfanuméricos y relacionales en JSON. Provee atributos temáticos: nombre de la banda/artista, fecha del evento, denominación del tour y vinculación relacional con el identificador unívoco del recinto (`venue_id`), permitiendo asociar cada registro alfanumérico a su correspondiente coordenada espacial.
+* **Datos Temáticos de Eventos Musicales (Conciertos en Vivo y Giras):**
+  * **Evaluación de Múltiples APIs de Eventos:**
+    * *Ticketmaster Discovery API & SeatGeek:* Evaluadas técnicamente; ofrecen catálogo comercial pero requieren credenciales de desarrollador cerradas (`apikey` / `client_id`) con límites de cuota restringidos para entornos académicos abiertos.
+    * *Wikidata SPARQL:* Se testeó la consulta semántica de instancias de festivales (`Q18608583`, `Q1656682`) en Argentina; no obstante, el tiempo de respuesta del motor SPARQL excede los 30 segundos, resultando inadecuado para búsquedas interactivas en el cliente.
+    * *Portal Municipal Rosario:* Carece de feed abierto de recitales en vivo.
+  * **Solución Multi-API en Tiempo Real Integrada:**
+    1. **Bandsintown REST API:** Servicio web abierto con soporte directo de CORS (`Access-Control-Allow-Origin: *`). Permite interrogar en tiempo real las fechas confirmadas de giras activas de artistas clave del rock, pop, trap y música nacional en Argentina y Rosario. Cada evento provee atributos alfanuméricos (título del tour, fecha en ISO 8601, enlaces de boletaría oficial) y atributos espaciales nativos (`latitude`, `longitude` del recinto).
+    2. **MusicBrainz Events API:** Servicio abierto de la MetaBrainz Foundation (`/ws/2/event?query=Rosario`). Aporta registros históricos y contemporáneos de conciertos comunitarios documentados en los principales recintos de la ciudad.
+  * **Vinculación Espacial Dinámica:** Los registros provenientes de ambas APIs se combinan, deduplican y normalizan en tiempo real en el cliente. Si un evento de Bandsintown introduce un nuevo recinto con geocoordenadas verificadas en Rosario (ej. predios de festivales o clubes independientes), el sistema lo georreferencia dinámicamente como un nuevo nodo puntual en el mapa.
 
 ---
 
@@ -59,7 +65,7 @@ El flujo de trabajo se orienta al desarrollo front-end moderno y *webmapping*:
 ---
 
 ## 5. Integración con otras tecnologías
-* **Geoservicios y Consumo de APIs REST:** La arquitectura opera mediante un esquema cliente-servidor HTTP. El cliente web realiza peticiones asíncronas (`fetch`) a los servicios de MusicBrainz y Setlist.fm, normalizando las respuestas en memoria hacia estructuras análogas a colecciones GeoJSON (`FeatureCollection` de puntos con propiedades temáticas).
+* **Geoservicios y Consumo Multi-API REST:** La arquitectura opera mediante un esquema cliente-servidor HTTP asíncrono y resiliente. El cliente web realiza peticiones simultáneas (`Promise.all`) a OpenStreetMap Nominatim, MusicBrainz Places, Bandsintown Live API y MusicBrainz Events API, normalizando las respuestas en memoria hacia estructuras análogas a colecciones GeoJSON (`FeatureCollection` de puntos con propiedades temáticas).
 * **Interoperabilidad OGC:** La plataforma se alinea con las pautas del Open Geospatial Consortium (OGC) para el intercambio ágil de información geográfica basada en estándares abiertos.
 * **Persistencia Espacial Futura:** La solución actual está optimizada para renderizar con fluidez hasta 9999 entidades en memoria. En etapas posteriores con concurrencia masiva, la arquitectura contempla persistencia en bases de datos espaciales relacionales objeto-relacionales (**PostgreSQL + PostGIS**).
 * **Despliegue Continuo (CI/CD):** Flujo automatizado con GitHub Actions que compila el código TypeScript y despliega la SPA en GitHub Pages bajo `HashRouter`.
