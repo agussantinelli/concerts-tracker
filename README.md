@@ -96,8 +96,8 @@
    </tr>
    <tr>
     <td><strong>Consumo de Datos (APIs en Vivo)</strong></td>
-    <td>Bandsintown Live API + MusicBrainz Events + OpenStreetMap Nominatim + MusicBrainz Places</td>
-    <td>Arquitectura multi-API REST en tiempo real (0% hardcoding). Fechas de gira y coordenadas en directo con enlaces a entradas oficiales.</td>
+    <td>OpenStreetMap (vía motor Photon) + Bandsintown Live REST API</td>
+    <td>Arquitectura multi-API REST en tiempo real (0% hardcoding). Unificación espacial por distancia geodésica (Haversine), filtro estricto de fechas a partir de hoy y enlaces a boletaría oficial.</td>
    </tr>
    <tr>
     <td><strong>Despliegue Continuo (CI/CD)</strong></td>
@@ -111,25 +111,27 @@
 
 <h2>🏗️ Arquitectura de la Solución</h2>
 
- <p>Concerts Tracker sigue una arquitectura de <strong>Single Page Application (SPA)</strong> con un fuerte enfoque en el procesamiento de datos geográficos desde el cliente:</p>
+ <p>Concerts Tracker sigue una arquitectura de <strong>Single Page Application (SPA)</strong> con un fuerte enfoque en el procesamiento de datos geográficos desde el cliente sin almacenamiento estático:</p>
 
  <ul>
      <li><strong>Capa de Presentación (UI):</strong>
          <ul>
-             <li>Desarrollada íntegramente con componentes funcionales de React.</li>
+             <li>Desarrollada íntegramente con componentes funcionales de React 19 y estilos Vanilla CSS modernos.</li>
+             <li>Selector desplegable personalizado con estética <em>glassmorphism</em> (desenfoque de 16px, etiquetas tipológicas de recinto y scrollbar estilizada).</li>
              <li>Renderizado ultrarrápido apoyado por la herramienta de construcción Vite.</li>
          </ul>
      </li>
      <li><strong>Capa de Mapeo (GIS Web):</strong>
          <ul>
-             <li>Uso de <code>react-leaflet</code> para proyectar datos tabulares (latitud, longitud) sobre cartografía de <strong>OpenStreetMap</strong>.</li>
-             <li>Adopta por defecto el sistema de proyección Web Mercator (EPSG: 3857).</li>
+             <li>Uso de <code>react-leaflet</code> para proyectar datos tabulares (latitud, longitud) sobre cartografía base de <strong>OpenStreetMap</strong>.</li>
+             <li>Adopta por defecto el sistema de proyección Web Mercator (EPSG: 3857) a partir de coordenadas esferoidales nativas WGS84 (EPSG: 4326).</li>
          </ul>
      </li>
-     <li><strong>Capa de Procesamiento Local:</strong>
+     <li><strong>Capa de Procesamiento Local y Análisis Espacial:</strong>
          <ul>
-             <li>Uso de Hooks de React (useMemo, useState) para filtrado reactivo simultáneo.</li>
-             <li>Conversión on-the-fly de estructuras de objetos (arrays estáticos) en popups detallados y marcadores de mapa.</li>
+             <li>Consumo en tiempo real de geometrías de OpenStreetMap y fechas de gira oficiales de Bandsintown.</li>
+             <li><strong>Unificación Geodésica (Haversine):</strong> Emparejamiento espacial automático que vincula recitales con coordenadas próximas (&le; 600m) a los recintos oficiales de OpenStreetMap para evitar pines duplicados.</li>
+             <li>Filtrado temporal estricto que muestra permanente y únicamente eventos desde el día de la fecha en adelante, ordenados cronológicamente.</li>
          </ul>
      </li>
  </ul>
@@ -142,12 +144,14 @@
 ├── .github/workflows/       # Scripts de automatización CI/CD (GitHub Actions)
 ├── docs/                    # Documentación del proyecto
 │   ├── ENUNCIADO.md         # Enunciado original del TP
-│   ├── PROPOSAL.md          # Propuesta formal y objetivos del proyecto
+│   ├── PROPOSAL.md          # Propuesta formal y objetivos del proyecto SIG
 ├── public/                  # Recursos públicos estáticos
 ├── src/                     # Código Fuente de la Aplicación
 │   ├── pages/               # Vistas principales (Home, MapPage) y sus estilos CSS
+│   ├── services/            # Servicios de consumo en tiempo real (concertsService.ts)
+│   ├── types/               # Definiciones e interfaces TypeScript (Venue, ConcertEvent)
 │   ├── App.tsx              # Componente enrutador principal (HashRouter)
-│   ├── index.css            # Estilos globales de la aplicación y tokens (colores)
+│   ├── index.css            # Estilos globales de la aplicación y tokens de diseño
 │   └── main.tsx             # Punto de entrada y montaje de React
 ├── index.html               # Plantilla HTML principal
 ├── package.json             # Dependencias del proyecto y scripts
