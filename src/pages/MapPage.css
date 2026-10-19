@@ -154,10 +154,15 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: transparent;
   padding: 8px 10px;
   border-radius: 6px;
   color: #e2e8f0;
+  font-family: inherit;
   font-size: 0.85rem;
+  text-align: left;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -169,8 +174,8 @@
 }
 
 .custom-select-option.active {
-  background: rgba(138, 43, 226, 0.35);
-  color: #c084fc;
+  background: #2e104d;
+  color: #f3e8ff;
   font-weight: 600;
 }
 
@@ -322,9 +327,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(138, 43, 226, 0.15);
-  border: 1px solid rgba(138, 43, 226, 0.4);
-  color: #c084fc;
+  background: #24103a;
+  border: 1px solid #7c3aed;
+  color: #f3e8ff;
   font-size: 0.75rem;
   padding: 4px 10px;
   border-radius: 12px;
@@ -362,15 +367,15 @@
 }
 
 .source-badge.bandsintown {
-  background: rgba(0, 180, 216, 0.15);
-  color: #00b4d8;
-  border: 1px solid rgba(0, 180, 216, 0.4);
+  background: #082938;
+  color: #7dd3fc;
+  border: 1px solid #0284c7;
 }
 
 .source-badge.musicbrainz {
-  background: rgba(235, 87, 87, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(235, 87, 87, 0.4);
+  background: #3a1015;
+  color: #fca5a5;
+  border: 1px solid #dc2626;
 }
 
 .ticket-link-btn {
@@ -378,9 +383,9 @@
   align-items: center;
   gap: 5px;
   font-size: 0.75rem;
-  background: rgba(138, 43, 226, 0.25);
-  color: #e9d5ff;
-  border: 1px solid rgba(138, 43, 226, 0.5);
+  background: #2c1048;
+  color: #ffffff;
+  border: 1px solid #9333ea;
   padding: 4px 8px;
   border-radius: 4px;
   text-decoration: none;

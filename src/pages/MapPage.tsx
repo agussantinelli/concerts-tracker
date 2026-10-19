@@ -93,7 +93,7 @@ function MapPage() {
       }
     }
 
-    loadDataFromApis();
+    void loadDataFromApis();
     return () => { isMounted = false; };
   }, []);
 
@@ -187,7 +187,8 @@ function MapPage() {
 
                 {isVenueDropdownOpen && (
                   <div className="custom-select-options">
-                    <div 
+                    <button 
+                      type="button"
                       className={`custom-select-option ${venueFilter === 'ALL' ? 'active' : ''}`}
                       onClick={() => {
                         setVenueFilter('ALL');
@@ -196,10 +197,11 @@ function MapPage() {
                     >
                       <span style={{ fontWeight: venueFilter === 'ALL' ? 600 : 400 }}>Todos los Recintos</span>
                       <span className="option-count">({venues.length})</span>
-                    </div>
+                    </button>
 
                     {venues.map(v => (
-                      <div 
+                      <button 
+                        type="button"
                         key={v.id}
                         className={`custom-select-option ${venueFilter === v.id.toString() ? 'active' : ''}`}
                         onClick={() => {
@@ -212,7 +214,7 @@ function MapPage() {
                           {v.type && <span className="option-type-tag">{v.type}</span>}
                         </div>
                         {venueFilter === v.id.toString() && <FaCheck size={11} color="var(--violet-light)" />}
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}
@@ -227,16 +229,22 @@ function MapPage() {
           </div>
 
           <div className="sidebar-content">
-            {loading ? (
-              <div className="no-results">
-                Consultando APIs en tiempo real (Bandsintown, MusicBrainz & OpenStreetMap)...
-              </div>
-            ) : filteredEvents.length === 0 ? (
-              <div className="no-results">
-                <p>No se encontraron conciertos programados a partir del día de la fecha.</p>
-              </div>
-            ) : (
-              filteredEvents.map(event => {
+            {(() => {
+              if (loading) {
+                return (
+                  <div className="no-results">
+                    Consultando APIs en tiempo real (Bandsintown, MusicBrainz & OpenStreetMap)...
+                  </div>
+                );
+              }
+              if (filteredEvents.length === 0) {
+                return (
+                  <div className="no-results">
+                    <p>No se encontraron conciertos programados a partir del día de la fecha.</p>
+                  </div>
+                );
+              }
+              return filteredEvents.map(event => {
                 const venue = venues.find(v => v.id.toString() === event.venueId.toString());
                 const isBandsintown = event.source === 'Bandsintown';
                 return (
@@ -278,8 +286,8 @@ function MapPage() {
                     )}
                   </div>
                 );
-              })
-            )}
+              });
+            })()}
           </div>
         </aside>
 

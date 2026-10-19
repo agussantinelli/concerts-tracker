@@ -128,6 +128,46 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
   }
 }
 
+function isRosarioLocation(city: string, venueName: string, lat: number, lon: number): boolean {
+  return (
+    city.toLowerCase().includes('rosario') || 
+    venueName.toLowerCase().includes('rosario') ||
+    (!Number.isNaN(lat) && !Number.isNaN(lon) && lat >= -33.15 && lat <= -32.75 && lon >= -60.85 && lon <= -60.50)
+  );
+}
+
+function matchOsmVenue(lat: number, lon: number, venueName: string, osmVenues: Venue[]): Venue | null {
+  // 1. Unificación espacial por distancia mínima
+  if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+    let minDistance = Infinity;
+    let closestVenue: Venue | null = null;
+    for (const osmV of osmVenues) {
+      const dist = getDistanceMeters(lat, lon, osmV.pos[0], osmV.pos[1]);
+      if (dist < minDistance) {
+        minDistance = dist;
+        if (dist <= 600) {
+          closestVenue = osmV;
+        }
+      }
+    }
+    if (closestVenue) return closestVenue;
+  }
+
+  // 2. Emparejamiento semántico por palabras clave
+  const vLower = venueName.toLowerCase();
+  return osmVenues.find(osmV => {
+    const oLower = osmV.name.toLowerCase();
+    return (
+      (vLower.includes('anfiteatro') && oLower.includes('anfiteatro')) ||
+      (vLower.includes('hipódromo') && oLower.includes('hipódromo')) ||
+      ((vLower.includes('bielsa') || vLower.includes('newell')) && (oLower.includes('bielsa') || oLower.includes('newell'))) ||
+      ((vLower.includes('arroyito') || vLower.includes('central')) && (oLower.includes('arroyito') || oLower.includes('central'))) ||
+      (vLower.includes('metropolitano') && oLower.includes('metropolitano')) ||
+      ((vLower.includes('bioceres') || vLower.includes('vorterix')) && (oLower.includes('bioceres') || oLower.includes('vorterix')))
+    );
+  }) || null;
+}
+
 /**
  * Consulta en tiempo real los conciertos exclusivamente desde la API de Bandsintown.
  * Unifica espacialmente cada concierto con los recintos de OpenStreetMap:
@@ -164,60 +204,21 @@ export async function fetchLiveEvents(osmVenues: Venue[]): Promise<{
     const bitResults = await Promise.all(bitPromises);
 
     bitResults.flat().forEach((ev: any) => {
-      if (!ev || !ev.datetime) return;
+      if (!ev?.datetime) return;
 
       const date = ev.datetime.slice(0, 10);
-      // Validar estrictamente: solo conciertos a partir de hoy
       if (!date || date < today) return;
 
       const city = ev.venue?.city || '';
       const venueName = ev.venue?.name || '';
       const artist = ev.lineup?.[0] || ev.artist?.name || 'Artista';
-      const lat = parseFloat(ev.venue?.latitude);
-      const lon = parseFloat(ev.venue?.longitude);
+      const lat = Number.parseFloat(ev.venue?.latitude);
+      const lon = Number.parseFloat(ev.venue?.longitude);
 
-      // Determinar si el recital es en Rosario o área metropolitana
-      const isRosario = 
-        city.toLowerCase().includes('rosario') || 
-        venueName.toLowerCase().includes('rosario') ||
-        (!isNaN(lat) && !isNaN(lon) && lat >= -33.15 && lat <= -32.75 && lon >= -60.85 && lon <= -60.50);
+      if (!isRosarioLocation(city, venueName, lat, lon)) return;
 
-      if (!isRosario) return;
+      const matchedOSM = matchOsmVenue(lat, lon, venueName, osmVenues);
 
-      // Unificación espacial: buscar el recinto de OpenStreetMap más cercano
-      let matchedOSM: Venue | null = null;
-      let minDistance = Infinity;
-
-      if (!isNaN(lat) && !isNaN(lon)) {
-        for (const osmV of osmVenues) {
-          const dist = getDistanceMeters(lat, lon, osmV.pos[0], osmV.pos[1]);
-          if (dist < minDistance) {
-            minDistance = dist;
-            // Si la distancia es pequeña (<= 600m), unificar siempre con el de OpenStreetMap
-            if (dist <= 600) {
-              matchedOSM = osmV;
-            }
-          }
-        }
-      }
-
-      // Si no hubo coincidencia por distancia pequeña, emparejar semánticamente por palabras clave
-      if (!matchedOSM) {
-        const vLower = venueName.toLowerCase();
-        matchedOSM = osmVenues.find(osmV => {
-          const oLower = osmV.name.toLowerCase();
-          return (
-            (vLower.includes('anfiteatro') && oLower.includes('anfiteatro')) ||
-            (vLower.includes('hipódromo') && oLower.includes('hipódromo')) ||
-            (vLower.includes('bielsa') || vLower.includes('newell')) && (oLower.includes('bielsa') || oLower.includes('newell')) ||
-            (vLower.includes('arroyito') || vLower.includes('central')) && (oLower.includes('arroyito') || oLower.includes('central')) ||
-            (vLower.includes('metropolitano') && oLower.includes('metropolitano')) ||
-            (vLower.includes('bioceres') || vLower.includes('vorterix')) && (oLower.includes('bioceres') || oLower.includes('vorterix'))
-          );
-        }) || null;
-      }
-
-      // Si se vinculó a un recinto de OpenStreetMap, asociar el concierto
       if (matchedOSM) {
         const dedupeKey = `${artist.toLowerCase()}_${date}_${matchedOSM.id}`;
         if (!eventsMap.has(dedupeKey)) {
