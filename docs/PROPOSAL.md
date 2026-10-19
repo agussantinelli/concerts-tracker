@@ -1,71 +1,85 @@
 # Proposal: Plataforma de Visualización de Conciertos (Concerts Tracker)
 
-A continuación, se detalla la propuesta del Trabajo Práctico Integrador, adaptada a la nueva temática sobre visualización geográfica de conciertos. *(Nota: Todas las decisiones arquitectónicas e incógnitas iniciales ya han sido definidas y aplicadas al proyecto).*
+**Universidad Tecnológica Nacional – Facultad Regional Rosario**  
+**Cátedra:** Sistemas de Información Geográfica (SIG) – Comisión 2EK02    
+**Enlace al proyecto en vivo:** [https://agussantinelli.github.io/concerts-tracker/](https://agussantinelli.github.io/concerts-tracker/)
 
 ---
 
 ## 1. Introducción
-**Descripción del problema/necesidad:** 
-Los fanáticos de la música y los analistas de la industria suelen tener dificultades para visualizar de forma clara y unificada el alcance geográfico de las giras musicales o encontrar conciertos cercanos de sus bandas favoritas. La información suele estar fragmentada en formato de texto plano o listas, sin una representación espacial que facilite la toma de decisiones (por ejemplo, planificar viajes para asistir a un evento) o el análisis del alcance de un artista.
+**Descripción del problema/necesidad:**  
+Un Sistema de Información Geográfica (SIG) es un conjunto integrado de medios y métodos informáticos diseñado para recoger, gestionar, manipular, analizar y mostrar datos espacialmente referidos a la Tierra (Goodchild; Bracken y Webster). Su valor diferencial radica en funcionar como una base de datos espacial computarizada que vincula la información cartográfica digital con la información atributiva u organizada en tablas.
 
-**Relevancia para organizaciones o la sociedad:** 
-Este Sistema de Información Geográfica (SIG) web beneficiará tanto a usuarios finales (fans) que desean explorar eventos en un mapa interactivo con filtros, como potencialmente a agencias de promoción y *tour managers* para analizar la cobertura geográfica y la densidad de eventos en diferentes regiones o ciudades.
+En la actualidad, la industria de la música en vivo y la logística de giras generan un volumen masivo de datos territoriales. No obstante, los fanáticos y analistas suelen recibir esta información de manera fragmentada en formato de texto plano o listados alfanuméricos tradicionales. Al carecer de una perspectiva espacial, se desaprovechan las herramientas específicas del análisis espacial para identificar patrones y relaciones lógicas entre variables geográficas. Existe, por ende, una necesidad concreta de articular bases de datos temáticas (artistas, fechas, géneros) con bases de datos espaciales que codifiquen la localización de los recintos y escenarios.
+
+**Relevancia para organizaciones o la sociedad:**  
+Este SIG web beneficia a los usuarios finales (fans) al brindarles una herramienta de exploración interactiva con filtros cruzados, y a productores y *tour managers* para evaluar la densidad de eventos, la cobertura territorial de giras y la planificación logística en ciudades estratégicas como Rosario.
 
 ---
 
 ## 2. Objetivos
-**Objetivo General:** 
-Desarrollar una aplicación web interactiva que permita la visualización espacial y el filtrado de conciertos musicales en tiempo real o histórico, integrando datos de proveedores de eventos con mapas dinámicos.
+**Objetivo General:**  
+Desarrollar una aplicación web interactiva basada en el paradigma del *webmapping*, que permita la visualización geográfica y el filtrado dinámico de conciertos musicales, integrando bases de datos temáticas de eventos con cartografía digital en un único mapa visual.
 
 **Objetivos Específicos:**
-* Mapear la distribución espacial de los conciertos y eventos musicales.
-* Permitir el filtrado dinámico de eventos por artista/banda, rango de fechas y ubicación geográfica.
-* Analizar de forma visual el alcance a nivel geográfico de una banda (ej. ciudades o países visitados en una gira).
+* **Representar la distribución espacial:** Mapear los conciertos y escenarios mediante el modelo vectorial, empleando entidades geométricas de puntos definidos por coordenadas precisas (latitud y longitud en WGS84) para describir la localización exacta del evento.
+* **Filtrado reactivo cruzado:** Implementar herramientas de consulta que vinculen en tiempo real la base de datos alfanumérica (artista, fechas, género) y la base de datos espacial (recinto, localización).
+* **Análisis espacial de giras:** Facilitar el análisis visual del alcance territorial de artistas a nivel local, regional o global, permitiendo proyectar límites de cobertura geográfica de hasta 9999 kilómetros y evaluar la concentración de recitales en el territorio.
 
 ---
 
 ## 3. Tipos y Fuentes de Información
-En este apartado se utilizarán datos dinámicos consumidos mediante servicios web (APIs), los cuales se traducirán a formatos espaciales legibles por el mapa (ej. GeoJSON o marcadores de latitud/longitud).
+El sistema articula capas cartográficas digitales base con fuentes de datos de infraestructura y eventos consumidas mediante servicios web (APIs REST) y normalizadas a formatos espaciales legibles por el motor de renderizado:
 
-* **Datos de Mapas Base:** OpenStreetMap (OSM) será utilizado como la cartografía base de la plataforma.
-* **Datos de Eventos Musicales:** 
-  Para esta primera etapa, la información de los conciertos (artista, recinto, coordenadas, fecha) se implementará de manera estática (hardcodeada) mediante arreglos dentro del código fuente. Se pospone la integración de APIs externas para iteraciones posteriores.
+* **Datos de Mapas Base (Cartografía):**
+  * **Fuente:** OpenStreetMap (OSM).
+  * **Tipo:** Raster (XYZ Tiles) bajo proyección Web Mercator (EPSG: 3857).
+  * **Naturaleza:** Información Geográfica Voluntaria (VGI), aportada de forma libre y colaborativa por la comunidad global, consumida como servicio web continuo para optimizar el rendimiento sin requerir almacenamiento local.
+
+* **Datos de Infraestructura (Estadios, Teatros y Escenarios):**
+  * **Evaluación de Datos Abiertos Locales:** Se investigó el catálogo del portal oficial de la Municipalidad de Rosario (`datosabiertos.rosario.gob.ar` / `datos.rosario.gob.ar`). Dicho portal centraliza datasets estáticos (CSV/PDF) orientados a infraestructura deportiva pública y clubes barriales en plataforma DKAN, pero carece actualmente de un endpoint REST dinámico con soporte de CORS para estadios comerciales y salas de recitales.
+  * **Fuente Primaria Seleccionada:** **MusicBrainz Places API** (MetaBrainz Foundation).
+    * *Acceso:* Servicio web REST abierto (`https://musicbrainz.org/ws/2/place?query=area:Rosario&fmt=json`).
+    * *Formato y Tipo:* Vectorial puntual en JSON. Provee nombre del recinto, dirección catastral, tipología (Estadio, Arena, Anfiteatro, Concert Hall, Club) y coordenadas geodésicas oficiales (`latitude`, `longitude` en EPSG:4326).
+  * **Fuente Secundaria / Validación SIG:** **OpenStreetMap Nominatim / Overpass API**, empleada para validación de geometrías de equipamiento cultural y recreativo (`amenity=theatre`, `leisure=stadium`).
+
+* **Datos Temáticos de Eventos Musicales (Conciertos):**
+  * **Fuente Primaria:** **Setlist.fm REST API** (plataforma comunitaria de Live Nation) complementada con la API de eventos de **MusicBrainz**.
+  * **Formato y Tipo:** Datos alfanuméricos y relacionales en JSON. Provee atributos temáticos: nombre de la banda/artista, fecha del evento, denominación del tour y vinculación relacional con el identificador unívoco del recinto (`venue_id`), permitiendo asociar cada registro alfanumérico a su correspondiente coordenada espacial.
 
 ---
 
 ## 4. Metodología (Herramientas y Procesos Implicados)
-El flujo de trabajo estará orientado al desarrollo de software y consumo de servicios (frontend y web mapping).
+El flujo de trabajo se orienta al desarrollo front-end moderno y *webmapping*:
 
-* **Desarrollo del Entorno:** Se utilizará un stack basado en Node.js, gestor de paquetes `pnpm`, **React** (creado con Vite) para la interfaz de usuario, y **Leaflet** (`react-leaflet`) para el motor de renderizado del mapa.
-* **Proyección Cartográfica:** Se empleará el sistema de proyección por defecto de Leaflet, **Web Mercator (EPSG: 3857)**. Se adoptó esta opción por practicidad, comodidad y por ser el estándar predominante en los ecosistemas de mapas interactivos web.
-* **Filtrado y Visualización Reactiva:** El procesamiento no se hará en QGIS, sino de manera íntegra en el cliente web mediante un panel lateral de control. Se construyó un sistema de filtrado reactivo en tiempo real que permite cruzar simultáneamente criterios por atributos (búsqueda libre por nombre de banda/artista) y espaciales (desplegable para filtrar por recinto o venue). El mapa responde dinámicamente ocultando o mostrando los marcadores según las coincidencias.
+* **Entorno y Stack:** Node.js con gestor de paquetes `pnpm`, **React 19** con **Vite** y **TypeScript** para un tipado estático robusto, y **Leaflet** (`react-leaflet`) como motor cartográfico.
+* **Proyección Cartográfica y Sistema de Referencia:** Para resolver la imposibilidad geométrica de proyectar el elipsoide terrestre sobre un plano sin deformaciones, la aplicación adopta **Web Mercator (EPSG: 3857)** como proyección planar estándar de visualización web, realizando la transformación sobre las coordenadas esferoidales nativas WGS84 (EPSG: 4326).
+* **Filtrado y Procesamiento Reactivo en Cliente:** A diferencia de software de escritorio tradicional (ej. QGIS), el procesamiento se ejecuta en el navegador. Se diseñó un panel lateral *glassmorphism* que interroga las entidades en memoria, permitiendo búsquedas textuales por atributos y filtrado por recintos, actualizando de forma reactiva la visibilidad de los marcadores en el mapa.
 
 ---
 
 ## 5. Integración con otras tecnologías
-A diferencia de un SIG de escritorio tradicional, este proyecto ya nace como una plataforma web integrada:
-* **APIs Web (Diferido):** La integración directa con proveedores de datos vía REST (fetch/Axios) se ha planteado como un objetivo a futuro, utilizando datos estáticos en la fase inicial.
-* **Despliegue Continuo (CI/CD):** La aplicación cuenta con un flujo de trabajo (Workflow) de GitHub Actions para compilación y despliegue automatizado en GitHub Pages mediante `HashRouter`.
-* **Almacenamiento y Persistencia (Sin BDD):** Para la versión actual, se ha decidido no emplear una base de datos externa ni un backend. Todo el conjunto de marcadores y eventos operará directamente en memoria a partir de arreglos en el frontend. En el futuro, la arquitectura podría evolucionar hacia el uso de motores como **PostgreSQL + PostGIS** si los requerimientos de persistencia lo exigen.
+* **Geoservicios y Consumo de APIs REST:** La arquitectura opera mediante un esquema cliente-servidor HTTP. El cliente web realiza peticiones asíncronas (`fetch`) a los servicios de MusicBrainz y Setlist.fm, normalizando las respuestas en memoria hacia estructuras análogas a colecciones GeoJSON (`FeatureCollection` de puntos con propiedades temáticas).
+* **Interoperabilidad OGC:** La plataforma se alinea con las pautas del Open Geospatial Consortium (OGC) para el intercambio ágil de información geográfica basada en estándares abiertos.
+* **Persistencia Espacial Futura:** La solución actual está optimizada para renderizar con fluidez hasta 9999 entidades en memoria. En etapas posteriores con concurrencia masiva, la arquitectura contempla persistencia en bases de datos espaciales relacionales objeto-relacionales (**PostgreSQL + PostGIS**).
+* **Despliegue Continuo (CI/CD):** Flujo automatizado con GitHub Actions que compila el código TypeScript y despliega la SPA en GitHub Pages bajo `HashRouter`.
 
 ---
 
 ## 6. Resultados (Entregables Alcanzados y Esperados)
-* **Frontend SPA Funcional:** Aplicación web responsiva desarrollada con React, Vite y TypeScript, enrutada vía `HashRouter`.
-* **Mapa Interactivo:** Integración de Leaflet sobre OpenStreetMap, acompañado de un panel lateral (sidebar) glassmorphism con filtros simultáneos por Artista y Recinto.
-* **Despliegue en la Nube:** Proyecto montado y público en GitHub Pages de forma automatizada.
-* **Pendiente:** Implementación de *Marker Clustering* para agrupar visualmente la densidad de conciertos cuando el volumen de datos escale.
+* **SPA Funcional:** Aplicación responsiva en producción pública en GitHub Pages.
+* **Mapa Interactivo:** Integración de Leaflet sobre OpenStreetMap con marcadores vectoriales personalizados y ventanas emergentes (*popups*) con el detalle de eventos y venta de entradas.
+* **Filtros Simultáneos:** Panel de control para consultas espaciales y temáticas en tiempo real.
+* **Entregable Pendiente (Marker Clustering):** Implementación de algoritmos de agrupamiento de marcadores para optimizar la visualización en escalas cartográficas menores (visión global o regional con menor nivel de detalle).
 
 ---
 
-## 7. Discusión y/o Conclusión
-El proyecto demostrará la viabilidad y las ventajas de integrar herramientas SIG de código abierto (OpenStreetMap, Leaflet) dentro de ecosistemas de desarrollo web modernos (React). Se concluirá cómo la representación geoespacial aporta un valor agregado sustancial a los datos tabulares tradicionales de eventos, mejorando la experiencia del usuario y facilitando la percepción del alcance territorial de la industria musical.
+## 7. Discusión y Conclusión
+"Concerts Tracker" demuestra la eficacia del *webmapping* para democratizar el acceso a información territorial. Al estructurar los eventos bajo el modelo vectorial de puntos, el sistema trasciende el concepto de un mapa estático y se consolida como una base de datos espacial interactiva. La integración de fuentes abiertas colaborativas (OpenStreetMap, MusicBrainz, Setlist.fm) valida la viabilidad de construir soluciones SIG interoperables, modernas y sostenibles sin depender de software propietario.
 
 ---
 
 ## 8. Vinculación con las competencias del Ingeniero en Sistemas de Información
-Este proyecto potencia habilidades centrales de la carrera y el rol del ingeniero moderno:
-* **Desarrollo de Software y Arquitectura Web:** Diseño e implementación de sistemas interactivos que consumen servicios de terceros.
-* **Integración de Tecnologías:** Capacidad para combinar herramientas de mapeo (SIG web) con programación front-end.
-* **Resolución de problemas de la información:** Transformar grandes volúmenes de datos crudos (JSONs de APIs) en información visual, interactiva y estructurada que asista en la toma de decisiones o mejore la experiencia final de un usuario.
-* **Investigación y Toma de Decisiones Técnicas:** Evaluación activa de proveedores de datos (APIs) y estándares tecnológicos (proyecciones cartográficas EPSG).
+* **Arquitectura de Software Web:** Diseño de aplicaciones reactivas que consumen geoservicios y APIs de terceros.
+* **Ciencia de Datos Espaciales:** Capacidad para estructurar, georreferenciar y transformar datos alfanuméricos crudos en información cartográfica interactiva.
+* **Investigación y Selección Tecnológica:** Evaluación crítica de repositorios abiertos (portal municipal DKAN vs. APIs de datos abiertos colaborativos como MusicBrainz).
