@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { 
@@ -9,7 +9,9 @@ import {
   FaFilter, 
   FaBroadcastTower, 
   FaSortAmountDownAlt,
-  FaExternalLinkAlt
+  FaExternalLinkAlt,
+  FaChevronDown,
+  FaCheck
 } from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
@@ -44,9 +46,28 @@ function MapPage() {
 
   const [artistFilter, setArtistFilter] = useState('');
   const [venueFilter, setVenueFilter] = useState('ALL');
+  const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   
   // Fecha actual (formato YYYY-MM-DD) para filtrar siempre conciertos a partir de hoy
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  // Cerrar dropdown al hacer click fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsVenueDropdownOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const selectedVenue = useMemo(() => {
+    return venues.find(v => v.id.toString() === venueFilter);
+  }, [venues, venueFilter]);
 
   useEffect(() => {
     let isMounted = true;
@@ -148,18 +169,54 @@ function MapPage() {
                 value={artistFilter}
                 onChange={(e) => setArtistFilter(e.target.value)}
               />
-              <select 
-                className="filter-select"
-                value={venueFilter}
-                onChange={(e) => setVenueFilter(e.target.value)}
-              >
-                <option value="ALL">Todos los Recintos ({venues.length})</option>
-                {venues.map(v => (
-                  <option key={v.id} value={v.id}>
-                    {v.name} {v.type ? `(${v.type})` : ''}
-                  </option>
-                ))}
-              </select>
+              {/* Dropdown Personalizado con Glassmorphism */}
+              <div className="custom-select-wrapper" ref={dropdownRef}>
+                <button 
+                  type="button"
+                  className={`custom-select-trigger ${isVenueDropdownOpen ? 'open' : ''}`}
+                  onClick={() => setIsVenueDropdownOpen(!isVenueDropdownOpen)}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                    <FaMapMarkerAlt size={13} color="var(--violet-light)" style={{ flexShrink: 0 }} />
+                    <span className="selected-venue-label">
+                      {selectedVenue ? selectedVenue.name : `Todos los Recintos (${venues.length})`}
+                    </span>
+                  </div>
+                  <FaChevronDown size={11} className={`select-arrow ${isVenueDropdownOpen ? 'rotated' : ''}`} />
+                </button>
+
+                {isVenueDropdownOpen && (
+                  <div className="custom-select-options">
+                    <div 
+                      className={`custom-select-option ${venueFilter === 'ALL' ? 'active' : ''}`}
+                      onClick={() => {
+                        setVenueFilter('ALL');
+                        setIsVenueDropdownOpen(false);
+                      }}
+                    >
+                      <span style={{ fontWeight: venueFilter === 'ALL' ? 600 : 400 }}>Todos los Recintos</span>
+                      <span className="option-count">({venues.length})</span>
+                    </div>
+
+                    {venues.map(v => (
+                      <div 
+                        key={v.id}
+                        className={`custom-select-option ${venueFilter === v.id.toString() ? 'active' : ''}`}
+                        onClick={() => {
+                          setVenueFilter(v.id.toString());
+                          setIsVenueDropdownOpen(false);
+                        }}
+                      >
+                        <div className="option-name-wrapper">
+                          <span className="option-name">{v.name}</span>
+                          {v.type && <span className="option-type-tag">{v.type}</span>}
+                        </div>
+                        {venueFilter === v.id.toString() && <FaCheck size={11} color="var(--violet-light)" />}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
             </div>
 
