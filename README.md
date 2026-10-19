@@ -95,9 +95,9 @@
     <td>Renderizado de cartografía base y capas.</td>
    </tr>
    <tr>
-    <td><strong>Consumo de Datos</strong></td>
-    <td>Arrays Estáticos (Local)</td>
-    <td>Los datos de eventos se gestionan desde memoria (hardcodeados) en esta etapa.</td>
+    <td><strong>Consumo de Datos (APIs en Vivo)</strong></td>
+    <td>Bandsintown Live API + MusicBrainz Events + OpenStreetMap Nominatim + MusicBrainz Places</td>
+    <td>Arquitectura multi-API REST en tiempo real (0% hardcoding). Fechas de gira y coordenadas en directo con enlaces a entradas oficiales.</td>
    </tr>
    <tr>
     <td><strong>Despliegue Continuo (CI/CD)</strong></td>
