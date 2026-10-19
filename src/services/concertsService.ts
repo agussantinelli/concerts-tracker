@@ -1,97 +1,108 @@
 import { Venue, ConcertEvent } from '../types';
 
 /**
- * Consulta en tiempo real las APIs públicas de OpenStreetMap (Nominatim) y MusicBrainz Places
- * para obtener dinámicamente los escenarios, teatros, anfiteatros y estadios de Rosario.
- * NO contiene ningún dato ni array estático hardcodeado.
+ * Calcula la distancia geodésica en metros entre dos coordenadas (Fórmula de Haversine)
+ */
+export function getDistanceMeters(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371e3; // Radio medio de la Tierra en metros
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+  const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+
+  const a =
+    Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+    Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+  return R * c;
+}
+
+/**
+ * Consulta en tiempo real las geometrías de OpenStreetMap (vía motor abierto Photon / OSM)
+ * para obtener dinámicamente los escenarios, teatros, anfiteatros, hipódromos y estadios de Rosario.
+ * 100% OpenStreetMap. Sin datos ni arrays hardcodeados.
  */
 export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: boolean }> {
   const venuesMap = new Map<string, Venue>();
 
   try {
-    // 1. Consultas simultáneas en tiempo real a OpenStreetMap Nominatim
-    const osmEndpoints = [
-      'https://nominatim.openstreetmap.org/search?q=estadio+Rosario+Argentina&format=json',
-      'https://nominatim.openstreetmap.org/search?q=teatro+Rosario+Argentina&format=json',
-      'https://nominatim.openstreetmap.org/search?q=anfiteatro+Rosario+Argentina&format=json'
+    const queries = [
+      'estadio Rosario Argentina',
+      'teatro Rosario Argentina',
+      'Anfiteatro Municipal Humberto de Nito Rosario',
+      'hipodromo Rosario Argentina',
+      'Metropolitano Rosario Argentina',
+      'Bioceres Arena Rosario'
     ];
 
-    const osmPromises = osmEndpoints.map(url =>
-      fetch(url, { headers: { 'Accept': 'application/json' } })
-        .then(res => res.ok ? res.json() : [])
-        .catch(() => [])
+    const results = await Promise.all(
+      queries.map(q =>
+        fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=12`, {
+          headers: { 'Accept': 'application/json' }
+        })
+          .then(r => r.ok ? r.json() : { features: [] })
+          .catch(() => ({ features: [] }))
+      )
     );
 
-    // 2. Consulta en tiempo real a MusicBrainz Places API
-    const mbPromise = fetch('https://musicbrainz.org/ws/2/place?query=area:Rosario&fmt=json&limit=100', {
-      headers: { 'Accept': 'application/json' }
-    })
-      .then(res => res.ok ? res.json() : { places: [] })
-      .catch(() => ({ places: [] }));
+    results.forEach(res => {
+      (res.features || []).forEach((f: any) => {
+        const name = (f.properties?.name || '').trim();
+        const lower = name.toLowerCase();
 
-    const [osmResults, mbData] = await Promise.all([
-      Promise.all(osmPromises),
-      mbPromise
-    ]);
+        // Filtrar ruidos, paradas de bus, bicicleteros o canchas de entrenamiento
+        if (
+          !name ||
+          lower.includes('pista') ||
+          lower.includes('bici') ||
+          lower.includes('parque industrial') ||
+          lower.includes('ciudad industria') ||
+          lower.includes('parada') ||
+          lower.includes('calle') ||
+          lower.includes('vega') ||
+          lower.includes('hockey')
+        ) {
+          return;
+        }
 
-    // Procesamiento y sanitización de recintos de OpenStreetMap
-    osmResults.flat().forEach((item: any) => {
-      if (
-        item.class === 'highway' ||
-        item.type === 'bus_stop' ||
-        item.type === 'bicycle_rental' ||
-        item.type === 'pitch'
-      ) {
-        return;
-      }
+        const [lon, lat] = f.geometry?.coordinates || [];
+        if (!lat || !lon) return;
 
-      const itemName = (item.name || '').trim();
-      const lower = itemName.toLowerCase();
-      if (!itemName || lower.includes('bici') || lower.includes('parada') || lower.includes('hockey')) {
-        return;
-      }
+        // Bounding box estricto del Gran Rosario (-33.15 a -32.80 lat, -60.85 a -60.55 lon)
+        if (lat < -33.15 || lat > -32.80 || lon < -60.85 || lon > -60.55) {
+          return;
+        }
 
-      const lat = parseFloat(item.lat);
-      const lon = parseFloat(item.lon);
-      if (!isNaN(lat) && !isNaN(lon)) {
+        const osmValue = f.properties?.osm_value;
         let cleanType = 'Escenario';
-        if (item.type === 'stadium') cleanType = 'Estadio';
-        else if (item.type === 'theatre') cleanType = 'Teatro';
+        if (osmValue === 'stadium' || lower.includes('estadio')) cleanType = 'Estadio';
+        else if (osmValue === 'theatre' || lower.includes('teatro') || lower.includes('anfiteatro')) cleanType = 'Teatro / Anfiteatro';
+        else if (lower.includes('hipódromo') || lower.includes('hipodromo')) cleanType = 'Hipódromo / Predio';
+        else if (lower.includes('arena') || lower.includes('metropolitano')) cleanType = 'Arena / Salón';
 
-        const key = lower;
-        if (!venuesMap.has(key)) {
+        // Unificar si hay duplicados a menos de 50m de distancia (mismo predio OSM)
+        let isDuplicate = false;
+        for (const existing of venuesMap.values()) {
+          const dist = getDistanceMeters(lat, lon, existing.pos[0], existing.pos[1]);
+          if (dist < 50) {
+            isDuplicate = true;
+            break;
+          }
+        }
+
+        if (!isDuplicate) {
+          const key = lower.replace(/\s+/g, ' ');
           venuesMap.set(key, {
-            id: `osm-${item.place_id}`,
-            name: itemName,
-            address: item.display_name?.split(',').slice(1, 4).join(',').trim() || 'Rosario, Santa Fe',
+            id: `osm-${f.properties?.osm_id || Math.abs(lat + lon).toFixed(4)}`,
+            name,
+            address: `${f.properties?.street || name}, Rosario, Santa Fe`,
             type: cleanType,
             pos: [lat, lon],
             source: 'OpenStreetMap'
           });
         }
-      }
-    });
-
-    // Procesamiento de recintos de MusicBrainz Places
-    const mbPlaces: any[] = Array.isArray(mbData.places) ? mbData.places : [];
-    mbPlaces.forEach((p: any) => {
-      if (p.coordinates?.latitude && p.coordinates?.longitude) {
-        const lat = parseFloat(p.coordinates.latitude);
-        const lon = parseFloat(p.coordinates.longitude);
-        if (!isNaN(lat) && !isNaN(lon)) {
-          const key = p.name.trim().toLowerCase();
-          if (!venuesMap.has(key)) {
-            venuesMap.set(key, {
-              id: p.id,
-              name: p.name,
-              address: p.address || 'Rosario, Santa Fe',
-              type: p.type || 'Sala de Conciertos',
-              pos: [lat, lon],
-              source: 'MusicBrainz'
-            });
-          }
-        }
-      }
+      });
     });
 
     const venueList = Array.from(venuesMap.values());
@@ -100,7 +111,7 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
       isLive: venueList.length > 0
     };
   } catch (error) {
-    console.error('Error al consultar geoservicios de escenarios en tiempo real:', error);
+    console.error('Error al consultar geoservicios de escenarios desde OpenStreetMap:', error);
     return {
       venues: Array.from(venuesMap.values()),
       isLive: false
@@ -109,23 +120,19 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
 }
 
 /**
- * Consulta en tiempo real múltiples APIs públicas y abiertas de eventos:
- * 1. Bandsintown REST API (Eventos confirmados y fechas de gira en tiempo real con coordenadas).
- * 2. MusicBrainz Events API (Eventos y conciertos históricos y registrados por la comunidad musical).
- * 
- * NO contiene ningún dato ni array estático hardcodeado.
+ * Consulta en tiempo real los conciertos exclusivamente desde la API de Bandsintown.
+ * Unifica espacialmente cada concierto con los recintos de OpenStreetMap:
+ * Si la distancia entre las coordenadas del evento y un recinto OSM es muy pequeña (<= 600m),
+ * se asigna siempre a la coordenada exacta y nombre oficial de OpenStreetMap.
  */
-export async function fetchLiveEvents(existingVenues: Venue[]): Promise<{ 
+export async function fetchLiveEvents(osmVenues: Venue[]): Promise<{ 
   events: ConcertEvent[]; 
-  extraVenues: Venue[];
   isLive: boolean;
-  sources: string[];
 }> {
   const eventsMap = new Map<string, ConcertEvent>();
-  const extraVenuesMap = new Map<string, Venue>();
-  const activeSources: string[] = [];
+  const today = new Date().toISOString().split('T')[0];
 
-  // Lista de artistas para consulta en vivo a Bandsintown (giras de rock, trap, pop, indie y música nacional)
+  // Artistas clave de giras de rock, trap, pop, indie y música nacional en Argentina
   const touringArtists = [
     'Fito Páez', 'Babasonicos', 'Divididos', 'WOS', 'Duki', 
     'Ciro y los Persas', 'Nicki Nicole', 'Charly García', 'La Renga', 
@@ -137,7 +144,6 @@ export async function fetchLiveEvents(existingVenues: Venue[]): Promise<{
   ];
 
   try {
-    // 1. Petición en tiempo real a Bandsintown API para los artistas
     const bitPromises = touringArtists.map(artist =>
       fetch(`https://rest.bandsintown.com/artists/${encodeURIComponent(artist)}/events?app_id=12345`, {
         headers: { 'Accept': 'application/json' }
@@ -146,88 +152,74 @@ export async function fetchLiveEvents(existingVenues: Venue[]): Promise<{
         .catch(() => [])
     );
 
-    // 2. Petición en tiempo real a MusicBrainz Events API
-    const mbPromise = fetch('https://musicbrainz.org/ws/2/event?query=Rosario&fmt=json&limit=100', {
-      headers: { 
-        'Accept': 'application/json',
-        'User-Agent': 'ConcertsTrackerSIG/1.0 (student@utn.edu.ar)'
-      }
-    })
-      .then(res => res.ok ? res.json() : { events: [] })
-      .catch(() => ({ events: [] }));
+    const bitResults = await Promise.all(bitPromises);
 
-    const [bitResults, mbData] = await Promise.all([
-      Promise.all(bitPromises),
-      mbPromise
-    ]);
-
-    // ==========================================
-    // PROCESAMIENTO BANDSINTOWN EN TIEMPO REAL
-    // ==========================================
-    let bitFound = false;
     bitResults.flat().forEach((ev: any) => {
       if (!ev || !ev.datetime) return;
-      bitFound = true;
+
+      const date = ev.datetime.slice(0, 10);
+      // Validar estrictamente: solo conciertos a partir de hoy
+      if (!date || date < today) return;
 
       const city = ev.venue?.city || '';
-      const country = ev.venue?.country || '';
       const venueName = ev.venue?.name || '';
       const artist = ev.lineup?.[0] || ev.artist?.name || 'Artista';
-      const date = ev.datetime.slice(0, 10);
       const lat = parseFloat(ev.venue?.latitude);
       const lon = parseFloat(ev.venue?.longitude);
 
-      // Determinar si el recital es en Rosario o alrededores metropolitanos de Santa Fe
+      // Determinar si el recital es en Rosario o área metropolitana
       const isRosario = 
         city.toLowerCase().includes('rosario') || 
         venueName.toLowerCase().includes('rosario') ||
         (!isNaN(lat) && !isNaN(lon) && lat >= -33.15 && lat <= -32.75 && lon >= -60.85 && lon <= -60.50);
 
-      // Si no es en Rosario ni en Argentina, ignorar
-      const isArgentina = country.toLowerCase().includes('argentina') || isRosario;
-      if (!isArgentina) return;
+      if (!isRosario) return;
 
-      // Vincular con un recinto existente en Rosario
-      let matchedVenue = existingVenues.find(v => {
-        const vLower = v.name.toLowerCase();
-        const evLower = venueName.toLowerCase();
-        if (vLower.includes(evLower) || evLower.includes(vLower)) return true;
-        // Emparejamiento semántico de hitos de Rosario
-        if (evLower.includes('anfiteatro') && vLower.includes('anfiteatro')) return true;
-        if (evLower.includes('hipódromo') && vLower.includes('hipódromo')) return true;
-        if (evLower.includes('bielsa') || evLower.includes('newell') && (vLower.includes('bielsa') || vLower.includes('newell'))) return true;
-        if (evLower.includes('arroyito') || evLower.includes('central') && (vLower.includes('arroyito') || vLower.includes('central'))) return true;
-        if (evLower.includes('metropolitano') && vLower.includes('metropolitano')) return true;
-        return false;
-      });
+      // Unificación espacial: buscar el recinto de OpenStreetMap más cercano
+      let matchedOSM: Venue | null = null;
+      let minDistance = Infinity;
 
-      // Si el evento tiene coordenadas en Rosario y no existía el recinto en OSM, agregarlo dinámicamente
-      if (!matchedVenue && isRosario && !isNaN(lat) && !isNaN(lon)) {
-        const dynamicVenueId = `bit-${ev.venue?.id || Math.abs(lat + lon).toFixed(4)}`;
-        matchedVenue = {
-          id: dynamicVenueId,
-          name: venueName || 'Escenario en Rosario',
-          address: ev.venue?.street_address || `${city}, Santa Fe`,
-          type: 'Escenario',
-          pos: [lat, lon],
-          source: 'Bandsintown'
-        };
-        extraVenuesMap.set(dynamicVenueId, matchedVenue);
+      if (!isNaN(lat) && !isNaN(lon)) {
+        for (const osmV of osmVenues) {
+          const dist = getDistanceMeters(lat, lon, osmV.pos[0], osmV.pos[1]);
+          if (dist < minDistance) {
+            minDistance = dist;
+            // Si la distancia es pequeña (<= 600m), unificar siempre con el de OpenStreetMap
+            if (dist <= 600) {
+              matchedOSM = osmV;
+            }
+          }
+        }
       }
 
-      // Si el concierto ocurre en Rosario y está vinculado a un recinto válido
-      if (isRosario && matchedVenue) {
-        const dedupeKey = `${artist.toLowerCase()}_${date}_${matchedVenue.id}`;
+      // Si no hubo coincidencia por distancia pequeña, emparejar semánticamente por palabras clave
+      if (!matchedOSM) {
+        const vLower = venueName.toLowerCase();
+        matchedOSM = osmVenues.find(osmV => {
+          const oLower = osmV.name.toLowerCase();
+          return (
+            (vLower.includes('anfiteatro') && oLower.includes('anfiteatro')) ||
+            (vLower.includes('hipódromo') && oLower.includes('hipódromo')) ||
+            (vLower.includes('bielsa') || vLower.includes('newell')) && (oLower.includes('bielsa') || oLower.includes('newell')) ||
+            (vLower.includes('arroyito') || vLower.includes('central')) && (oLower.includes('arroyito') || oLower.includes('central')) ||
+            (vLower.includes('metropolitano') && oLower.includes('metropolitano')) ||
+            (vLower.includes('bioceres') || vLower.includes('vorterix')) && (oLower.includes('bioceres') || oLower.includes('vorterix'))
+          );
+        }) || null;
+      }
+
+      // Si se vinculó a un recinto de OpenStreetMap, asociar el concierto
+      if (matchedOSM) {
+        const dedupeKey = `${artist.toLowerCase()}_${date}_${matchedOSM.id}`;
         if (!eventsMap.has(dedupeKey)) {
           eventsMap.set(dedupeKey, {
             id: `bit-${ev.id}`,
             artist,
             date,
-            venueId: matchedVenue.id,
-            venueName: matchedVenue.name,
-            city: city || 'Rosario',
+            venueId: matchedOSM.id,
+            venueName: matchedOSM.name,
+            city: 'Rosario',
             genre: 'Concierto en Vivo',
-            tour: (ev.title && ev.title !== artist && ev.title.length < 50) ? ev.title : undefined,
             ticketUrl: ev.offers?.[0]?.url || ev.url,
             source: 'Bandsintown'
           });
@@ -235,109 +227,19 @@ export async function fetchLiveEvents(existingVenues: Venue[]): Promise<{
       }
     });
 
-    if (bitFound) {
-      activeSources.push('Bandsintown Live API');
-    }
-
-    // ==========================================
-    // PROCESAMIENTO MUSICBRAINZ EN TIEMPO REAL
-    // ==========================================
-    const rawMbEvents: any[] = Array.isArray(mbData.events) ? mbData.events : [];
-    if (rawMbEvents.length > 0) {
-      activeSources.push('MusicBrainz Events API');
-    }
-
-    rawMbEvents.forEach((e: any) => {
-      const mainArtist = e.relations?.find((r: any) => r.type === 'main performer')?.artist?.name;
-      const guestArtist = e.relations?.find((r: any) => r.type === 'guest performer')?.artist?.name;
-      const artistName = mainArtist || guestArtist || e.name;
-      if (!artistName) return;
-
-      const eventDate: string = e['life-span']?.begin || e['life-span']?.ended || '';
-      if (!eventDate) return;
-
-      const placeRel = e.relations?.find((r: any) => r.type === 'held at')?.place;
-      const placeName: string = placeRel?.name || '';
-      const placeLower = placeName.toLowerCase();
-
-      // Descartar homónimos fuera de Argentina
-      if (
-        placeLower.includes('shizuoka') ||
-        placeLower.includes('pescara') ||
-        placeLower.includes('italy') ||
-        placeLower.includes('japan') ||
-        placeLower.includes('germany')
-      ) {
-        return;
-      }
-
-      // Vincular con recintos conocidos
-      let matchedVenue = existingVenues.find(v => {
-        if (placeRel?.id && v.id === placeRel.id) return true;
-        if (placeName && v.name.toLowerCase().includes(placeLower)) return true;
-        if (placeName && placeLower.includes(v.name.toLowerCase())) return true;
-        return false;
-      });
-
-      if (!matchedVenue && placeName) {
-        matchedVenue = existingVenues.find(v => {
-          const vLower = v.name.toLowerCase();
-          return (
-            (placeLower.includes('nito') && vLower.includes('nito')) ||
-            (placeLower.includes('metropolitano') && vLower.includes('metropolitano')) ||
-            (placeLower.includes('güemes') && vLower.includes('güemes')) ||
-            (placeLower.includes('astengo') && vLower.includes('astengo')) ||
-            (placeLower.includes('bioceres') && vLower.includes('bioceres')) ||
-            (placeLower.includes('vorterix') && vLower.includes('vorterix')) ||
-            (placeLower.includes('arroyito') && vLower.includes('arroyito')) ||
-            (placeLower.includes('bielsa') && vLower.includes('bielsa')) ||
-            (placeLower.includes('circulo') && vLower.includes('círculo')) ||
-            (placeLower.includes('city center') && vLower.includes('city center')) ||
-            (placeLower.includes('lavarden') && vLower.includes('lavardén'))
-          );
-        });
-      }
-
-      // Si no coincide con ninguno pero es un evento de Rosario con lugar especificado,
-      // asociar al primer recinto del tipo sala o anfiteatro Humberto de Nito si aplica
-      if (!matchedVenue) {
-        matchedVenue = existingVenues.find(v => v.name.toLowerCase().includes('nito')) || existingVenues[0];
-      }
-
-      if (matchedVenue) {
-        const dedupeKey = `${artistName.toLowerCase()}_${eventDate}_${matchedVenue.id}`;
-        if (!eventsMap.has(dedupeKey)) {
-          eventsMap.set(dedupeKey, {
-            id: `mb-${e.id}`,
-            artist: artistName,
-            date: eventDate,
-            venueId: matchedVenue.id,
-            venueName: placeName || matchedVenue.name,
-            city: 'Rosario',
-            genre: e.type || e.tags?.[0]?.name || 'Concierto en Vivo',
-            tour: e.disambiguation || (e.name !== artistName ? e.name : undefined),
-            source: 'MusicBrainz'
-          });
-        }
-      }
-    });
-
-    const parsedEvents = Array.from(eventsMap.values())
+    // Ordenar automáticamente por fecha cronológica ascendente
+    const sortedEvents = Array.from(eventsMap.values())
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return {
-      events: parsedEvents,
-      extraVenues: Array.from(extraVenuesMap.values()),
-      isLive: parsedEvents.length > 0,
-      sources: activeSources
+      events: sortedEvents,
+      isLive: sortedEvents.length > 0
     };
   } catch (error) {
-    console.error('Error al consultar eventos en vivo desde las APIs:', error);
+    console.error('Error al consultar eventos en vivo desde Bandsintown:', error);
     return {
-      events: Array.from(eventsMap.values()),
-      extraVenues: Array.from(extraVenuesMap.values()),
-      isLive: false,
-      sources: []
+      events: [],
+      isLive: false
     };
   }
 }
