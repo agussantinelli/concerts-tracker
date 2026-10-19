@@ -51,9 +51,10 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
         const name = (f.properties?.name || '').trim();
         const lower = name.toLowerCase();
 
-        // Filtrar ruidos, paradas de bus, bicicleteros o canchas de entrenamiento
+        // Filtrar ruidos, estaciones numeradas (bicicleteros como '30 - Estadio Municipal'), etc.
         if (
           !name ||
+          /^\d+\s*[-–]/.test(name) ||
           lower.includes('pista') ||
           lower.includes('bici') ||
           lower.includes('parque industrial') ||
@@ -61,7 +62,9 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
           lower.includes('parada') ||
           lower.includes('calle') ||
           lower.includes('vega') ||
-          lower.includes('hockey')
+          lower.includes('hockey') ||
+          f.properties?.osm_value === 'bicycle_rental' ||
+          f.properties?.osm_value === 'pitch'
         ) {
           return;
         }
@@ -74,6 +77,12 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
           return;
         }
 
+        let cleanName = name;
+        // Normalizar nombres redundantes del mismo estadio (ej. Marcelo A. Bielsa -> Marcelo Bielsa)
+        if (lower.includes('marcelo') && lower.includes('bielsa')) {
+          cleanName = 'Estadio Marcelo Bielsa';
+        }
+
         const osmValue = f.properties?.osm_value;
         let cleanType = 'Escenario';
         if (osmValue === 'stadium' || lower.includes('estadio')) cleanType = 'Estadio';
@@ -81,22 +90,22 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
         else if (lower.includes('hipódromo') || lower.includes('hipodromo')) cleanType = 'Hipódromo / Predio';
         else if (lower.includes('arena') || lower.includes('metropolitano')) cleanType = 'Arena / Salón';
 
-        // Unificar si hay duplicados a menos de 50m de distancia (mismo predio OSM)
+        // Unificar si hay duplicados a menos de 100m de distancia (mismo predio OSM)
         let isDuplicate = false;
         for (const existing of venuesMap.values()) {
           const dist = getDistanceMeters(lat, lon, existing.pos[0], existing.pos[1]);
-          if (dist < 50) {
+          if (dist < 100 || existing.name.toLowerCase() === cleanName.toLowerCase()) {
             isDuplicate = true;
             break;
           }
         }
 
         if (!isDuplicate) {
-          const key = lower.replace(/\s+/g, ' ');
+          const key = cleanName.toLowerCase();
           venuesMap.set(key, {
             id: `osm-${f.properties?.osm_id || Math.abs(lat + lon).toFixed(4)}`,
-            name,
-            address: `${f.properties?.street || name}, Rosario, Santa Fe`,
+            name: cleanName,
+            address: `${f.properties?.street || cleanName}, Rosario, Santa Fe`,
             type: cleanType,
             pos: [lat, lon],
             source: 'OpenStreetMap'
