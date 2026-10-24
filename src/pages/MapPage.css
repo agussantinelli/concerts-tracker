@@ -398,3 +398,191 @@
   color: #fff;
 }
 
+/* Selected Event Card and Action Buttons */
+.event-card.selected {
+  background: rgba(138, 43, 226, 0.18);
+  border-color: var(--violet-light);
+  box-shadow: 0 0 20px rgba(138, 43, 226, 0.35);
+  transform: translateY(-2px);
+}
+
+.card-selected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  background: #581c87;
+  color: #f3e8ff;
+  border: 1px solid var(--violet-light);
+}
+
+.venue-name-highlight {
+  font-weight: 500;
+  color: #e9d5ff;
+}
+
+.card-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-locate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 6px;
+}
+
+.card-locate-btn:hover,
+.card-locate-btn.active {
+  background: rgba(138, 43, 226, 0.3);
+  color: #fff;
+  border-color: var(--violet-light);
+}
+
+/* Active Selection Bar in Sidebar Header */
+.active-selection-bar {
+  background: rgba(88, 28, 135, 0.35);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  animation: selectionFadeIn 0.25s ease;
+}
+
+@keyframes selectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.selection-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #f3e8ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selection-info-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.btn-clear-selection {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f3e8ff;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-clear-selection:hover {
+  background: rgba(220, 38, 38, 0.35);
+  border-color: rgba(220, 38, 38, 0.6);
+  color: #fff;
+}
+
+/* Floating overlay on the map */
+.map-overlay-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  background: rgba(18, 9, 28, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--violet-light);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f3e8ff;
+  font-size: 0.82rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  animation: selectionFadeIn 0.25s ease;
+}
+
+.map-overlay-reset-btn {
+  background: rgba(138, 43, 226, 0.35);
+  border: 1px solid var(--violet-light);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.map-overlay-reset-btn:hover {
+  background: var(--violet-light);
+  color: #fff;
+}
+
+/* Highlight inside Popup */
+.popup-event-selected {
+  background: rgba(138, 43, 226, 0.25);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--violet-light);
+}
+
+.selected-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  background: #581c87;
+  color: #f3e8ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--violet-light);
+}
+

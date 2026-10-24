@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { 
   FaMapMarkerAlt, 
   FaCalendarAlt, 
@@ -11,7 +11,9 @@ import {
   FaSortAmountDownAlt,
   FaExternalLinkAlt,
   FaChevronDown,
-  FaCheck
+  FaCheck,
+  FaTimes,
+  FaEye
 } from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
@@ -36,6 +38,27 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
+// Controlador de cámara de Leaflet para centrar y animar fluidamente el mapa al seleccionar
+function MapController({ 
+  targetPos, 
+  zoom 
+}: { 
+  targetPos: [number, number]; 
+  zoom: number;
+}) {
+  const map = useMap();
+  const [lat, lon] = targetPos;
+
+  useEffect(() => {
+    map.flyTo([lat, lon], zoom, {
+      duration: 1.2,
+      easeLinearity: 0.25
+    });
+  }, [map, lat, lon, zoom]);
+
+  return null;
+}
+
 function MapPage() {
   const rosarioPosition: [number, number] = [-32.9468, -60.6393];
 
@@ -46,8 +69,10 @@ function MapPage() {
 
   const [artistFilter, setArtistFilter] = useState('');
   const [venueFilter, setVenueFilter] = useState('ALL');
+  const [selectedEventId, setSelectedEventId] = useState<string | number | null>(null);
   const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<L.Marker | null>(null);
   
   // Fecha actual (formato YYYY-MM-DD) para filtrar siempre conciertos a partir de hoy
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -68,6 +93,16 @@ function MapPage() {
   const selectedVenue = useMemo(() => {
     return venues.find(v => v.id.toString() === venueFilter);
   }, [venues, venueFilter]);
+
+  const selectedEvent = useMemo(() => {
+    if (!selectedEventId) return null;
+    return events.find(e => e.id.toString() === selectedEventId.toString()) || null;
+  }, [events, selectedEventId]);
+
+  const selectedEventVenue = useMemo(() => {
+    if (!selectedEvent) return null;
+    return venues.find(v => v.id.toString() === selectedEvent.venueId.toString()) || null;
+  }, [venues, selectedEvent]);
 
   useEffect(() => {
     let isMounted = true;
@@ -115,8 +150,30 @@ function MapPage() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [events, artistFilter, venueFilter, today]);
 
+  // Si el concierto seleccionado deja de estar en la lista filtrada, deseleccionar automáticamente
+  useEffect(() => {
+    if (selectedEventId && !filteredEvents.some(e => e.id.toString() === selectedEventId.toString())) {
+      setSelectedEventId(null);
+    }
+  }, [filteredEvents, selectedEventId]);
+
+  // Abrir automáticamente el popup del marcador seleccionado
+  useEffect(() => {
+    if (selectedEventId && markerRef.current) {
+      const timer = setTimeout(() => {
+        markerRef.current?.openPopup();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedEventId]);
+
   // Derivar qué recintos mostrar en la cartografía
   const activeVenues = useMemo(() => {
+    // Si el usuario seleccionó un concierto específico en la barra lateral, marcar ÚNICAMENTE ese recinto
+    if (selectedEventVenue) {
+      return [selectedEventVenue];
+    }
+    // Si seleccionó un recinto desde el menú desplegable
     if (venueFilter !== 'ALL') {
       return venues.filter(v => v.id.toString() === venueFilter);
     }
@@ -125,9 +182,20 @@ function MapPage() {
       const activeIds = new Set(filteredEvents.map(e => e.venueId.toString()));
       return venues.filter(v => activeIds.has(v.id.toString()));
     }
-    // Si no hay filtro de artista, mostrar todos los escenarios obtenidos de las APIs
+    // Si no hay filtro de artista ni selección individual, mostrar todos los escenarios
     return venues;
-  }, [venues, filteredEvents, venueFilter, artistFilter]);
+  }, [venues, filteredEvents, venueFilter, artistFilter, selectedEventVenue]);
+
+  // Calcular la posición y nivel de zoom hacia donde debe animar el mapa
+  const { targetPos, targetZoom } = useMemo(() => {
+    if (selectedEventVenue) {
+      return { targetPos: selectedEventVenue.pos, targetZoom: 15 };
+    }
+    if (selectedVenue) {
+      return { targetPos: selectedVenue.pos, targetZoom: 15 };
+    }
+    return { targetPos: rosarioPosition, targetZoom: 13 };
+  }, [selectedEventVenue, selectedVenue, rosarioPosition]);
 
   return (
     <div className="map-page-container">
@@ -189,9 +257,10 @@ function MapPage() {
                   <div className="custom-select-options">
                     <button 
                       type="button"
-                      className={`custom-select-option ${venueFilter === 'ALL' ? 'active' : ''}`}
+                      className={`custom-select-option ${venueFilter === 'ALL' && !selectedEventId ? 'active' : ''}`}
                       onClick={() => {
                         setVenueFilter('ALL');
+                        setSelectedEventId(null);
                         setIsVenueDropdownOpen(false);
                       }}
                     >
@@ -206,6 +275,7 @@ function MapPage() {
                         className={`custom-select-option ${venueFilter === v.id.toString() ? 'active' : ''}`}
                         onClick={() => {
                           setVenueFilter(v.id.toString());
+                          setSelectedEventId(null);
                           setIsVenueDropdownOpen(false);
                         }}
                       >
@@ -221,6 +291,26 @@ function MapPage() {
               </div>
 
             </div>
+
+            {/* Banner reactivo cuando un concierto está seleccionado y marcado individualmente */}
+            {selectedEvent && (
+              <div className="active-selection-bar">
+                <div className="selection-info">
+                  <FaMapMarkerAlt size={12} color="var(--violet-light)" style={{ flexShrink: 0 }} />
+                  <span className="selection-info-text">
+                    Marcado: <strong>{selectedEvent.artist}</strong> ({selectedEventVenue?.name})
+                  </span>
+                </div>
+                <button 
+                  type="button" 
+                  className="btn-clear-selection"
+                  onClick={() => setSelectedEventId(null)}
+                  title="Mostrar todos los recintos en el mapa"
+                >
+                  <FaTimes size={10} /> Ver todos
+                </button>
+              </div>
+            )}
 
             {/* Contador de resultados */}
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '10px' }}>
@@ -247,12 +337,35 @@ function MapPage() {
               return filteredEvents.map(event => {
                 const venue = venues.find(v => v.id.toString() === event.venueId.toString());
                 const isBandsintown = event.source === 'Bandsintown';
+                const isSelected = selectedEventId !== null && event.id.toString() === selectedEventId.toString();
+
                 return (
-                  <div key={event.id} className="event-card">
+                  <div 
+                    key={event.id} 
+                    className={`event-card ${isSelected ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedEventId(isSelected ? null : event.id);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedEventId(isSelected ? null : event.id);
+                      }
+                    }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                      {venue?.type && (
-                        <span className="venue-tag">{venue.type}</span>
-                      )}
+                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                        {venue?.type && (
+                          <span className="venue-tag">{venue.type}</span>
+                        )}
+                        {isSelected && (
+                          <span className="card-selected-badge">
+                            <FaCheck size={9} /> Marcado en el mapa
+                          </span>
+                        )}
+                      </div>
                       <span className={`source-badge ${isBandsintown ? 'bandsintown' : 'musicbrainz'}`}>
                         {event.source || 'API'}
                       </span>
@@ -260,10 +373,10 @@ function MapPage() {
 
                     <h3 className="event-artist">{event.artist}</h3>
 
-
                     <div className="event-details">
-                      <div className="event-details-row">
-                        <FaMapMarkerAlt color="var(--violet-electric)" /> {venue?.name || event.venueName || 'Recinto'}
+                      <div className="event-details-row venue-row">
+                        <FaMapMarkerAlt color="var(--violet-electric)" /> 
+                        <span className="venue-name-highlight">{venue?.name || event.venueName || 'Recinto'}</span>
                       </div>
                       <div className="event-details-row">
                         <FaCalendarAlt color="var(--violet-electric)" /> {event.date ? new Date(event.date + 'T00:00:00').toLocaleDateString('es-AR', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Fecha a confirmar'}
@@ -273,17 +386,31 @@ function MapPage() {
                       </div>
                     </div>
 
-                    {event.ticketUrl && (
-                      <a 
-                        href={event.ticketUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="ticket-link-btn"
-                        onClick={(e) => e.stopPropagation()}
+                    <div className="card-actions-row">
+                      {event.ticketUrl && (
+                        <a 
+                          href={event.ticketUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="ticket-link-btn"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <FaTicketAlt size={10} /> Entradas oficiales <FaExternalLinkAlt size={8} />
+                        </a>
+                      )}
+
+                      <button 
+                        type="button"
+                        className={`card-locate-btn ${isSelected ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedEventId(isSelected ? null : event.id);
+                        }}
+                        title={isSelected ? 'Desmarcar del mapa' : 'Marcar únicamente este concierto en el mapa'}
                       >
-                        <FaTicketAlt size={10} /> Entradas oficiales <FaExternalLinkAlt size={8} />
-                      </a>
-                    )}
+                        <FaEye size={11} /> {isSelected ? 'Desmarcar' : 'Ver en mapa'}
+                      </button>
+                    </div>
                   </div>
                 );
               });
@@ -293,11 +420,32 @@ function MapPage() {
 
         {/* Leaflet Map */}
         <div className="map-container-wrapper">
+          {/* Badge flotante sobre el mapa indicando que se está marcando un recital específico */}
+          {selectedEvent && selectedEventVenue && (
+            <div className="map-overlay-badge">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <FaMapMarkerAlt size={12} color="var(--violet-light)" />
+                <span>Mostrando únicamente: <strong>{selectedEventVenue.name}</strong> ({selectedEvent.artist})</span>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setSelectedEventId(null)} 
+                className="map-overlay-reset-btn"
+                title="Volver a mostrar todos los recintos"
+              >
+                <FaTimes size={10} /> Ver todos los recintos
+              </button>
+            </div>
+          )}
+
           <MapContainer center={rosarioPosition} zoom={13} style={{ height: '100%', width: '100%' }}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
+
+            {/* Controlador reactivo para animar la vista al seleccionar recitales */}
+            <MapController targetPos={targetPos} zoom={targetZoom} />
             
             {activeVenues.map((venue) => {
               // Encuentra eventos para este recinto específico, ordenados por fecha
@@ -305,8 +453,14 @@ function MapPage() {
                 .filter(e => e.venueId.toString() === venue.id.toString())
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
               
+              const isSelectedVenue = selectedEventVenue?.id.toString() === venue.id.toString();
+
               return (
-                <Marker key={venue.id} position={venue.pos}>
+                <Marker 
+                  key={venue.id} 
+                  position={venue.pos}
+                  ref={isSelectedVenue ? (ref) => { markerRef.current = ref; } : undefined}
+                >
                   <Popup className="custom-popup">
                     <div className="popup-venue-name">
                       <FaMapMarkerAlt style={{ marginRight: '6px' }} /> {venue.name}
@@ -321,29 +475,41 @@ function MapPage() {
                     )}
                     {venue.address && (
                       <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        📍 {venue.address}
+                        <FaMapMarkerAlt size={11} style={{ marginRight: '4px', verticalAlign: 'middle', color: 'var(--violet-light)' }} /> {venue.address}
                       </div>
                     )}
                     {venueEvents.length > 0 ? (
-                      venueEvents.map(ev => (
-                        <div key={ev.id} className="popup-event-item">
-                          <div className="popup-event-artist">{ev.artist}</div>
-                          <div className="popup-event-date">
-                            {ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('es-AR') : ''} - {ev.genre}
+                      venueEvents.map(ev => {
+                        const isThisConcertSelected = selectedEventId !== null && ev.id.toString() === selectedEventId.toString();
+                        return (
+                          <div 
+                            key={ev.id} 
+                            className={`popup-event-item ${isThisConcertSelected ? 'popup-event-selected' : ''}`}
+                          >
+                            {isThisConcertSelected && (
+                              <div className="selected-tag-pill">
+                                <FaCheck size={9} /> Concierto seleccionado
+                              </div>
+                            )}
+                            <div className="popup-event-artist">{ev.artist}</div>
+                            <div className="popup-event-date">
+                              {ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('es-AR') : ''} - {ev.genre}
+                            </div>
+                            {ev.ticketUrl && (
+                              <a 
+                                href={ev.ticketUrl} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="ticket-link-btn"
+                                style={{ marginTop: '4px', display: 'inline-flex' }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <FaTicketAlt size={10} /> Entradas <FaExternalLinkAlt size={8} />
+                              </a>
+                            )}
                           </div>
-                          {ev.ticketUrl && (
-                            <a 
-                              href={ev.ticketUrl} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className="ticket-link-btn"
-                              style={{ marginTop: '4px', display: 'inline-flex' }}
-                            >
-                              <FaTicketAlt size={10} /> Entradas <FaExternalLinkAlt size={8} />
-                            </a>
-                          )}
-                        </div>
-                      ))
+                        );
+                      })
                     ) : (
                       <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                         Recinto oficial obtenido en tiempo real desde OpenStreetMap.
