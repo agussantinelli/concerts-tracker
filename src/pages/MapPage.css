@@ -311,133 +311,6 @@
   font-size: 0.8rem;
 }
 
-/* Responsive adjustments for MapPage */
-@media (max-width: 768px) {
-
-  /* Achica el título principal y compacta el header solo en responsive */
-  .header {
-    padding: 10px 14px !important;
-  }
-
-  .header .logo,
-  .logo {
-    font-size: 0.88rem !important;
-    line-height: 1.25;
-  }
-
-  .header .btn-secondary {
-    padding: 5px 10px !important;
-    font-size: 0.75rem !important;
-  }
-
-  .map-page-layout {
-    flex-direction: column-reverse;
-    height: calc(100vh - 54px);
-  }
-
-  /* Ajuste de proporciones para dar más espacio al contenido en móviles */
-  .sidebar {
-    width: 100%;
-    height: 58%;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.5);
-  }
-
-  .map-container-wrapper {
-    width: 100%;
-    height: 42%;
-  }
-
-  /* El filtro ya NO ocupa todo en responsive: diseño compacto y optimizado */
-  .sidebar-header {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--border-color);
-  }
-
-  .sidebar-header h2 {
-    font-size: 1.05rem;
-    margin: 0;
-  }
-
-  .api-badge {
-    margin-top: 4px;
-    padding: 2px 8px;
-    font-size: 0.68rem;
-    gap: 4px;
-  }
-
-  /* Coloca los campos de filtro en grilla de 2 columnas para ahorrar espacio vertical */
-  .filter-group {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 8px !important;
-  }
-
-  .filter-input,
-  .custom-select-trigger {
-    padding: 6px 10px;
-    font-size: 0.8rem;
-    min-height: 36px;
-    box-sizing: border-box;
-  }
-
-  .selected-venue-label {
-    max-width: 110px;
-    font-size: 0.78rem;
-  }
-
-  .sidebar-header>div:last-child {
-    margin-top: 4px !important;
-    font-size: 0.7rem !important;
-  }
-
-  .active-selection-bar {
-    margin-top: 6px;
-    padding: 5px 10px;
-  }
-
-  .active-selection-bar .selection-info {
-    font-size: 0.72rem;
-  }
-
-  /* Tarjetas de eventos más compactas en móvil */
-  .sidebar-content {
-    padding: 10px 14px 75px 14px;
-    gap: 10px;
-  }
-
-  .event-card {
-    padding: 10px 12px;
-  }
-
-  .event-artist {
-    font-size: 0.98rem;
-    margin-bottom: 3px;
-  }
-
-  .event-details {
-    font-size: 0.78rem;
-    gap: 2px;
-  }
-
-  .card-actions-row {
-    margin-top: 6px;
-  }
-}
-
-@media (max-width: 400px) {
-
-  .header .logo,
-  .logo {
-    font-size: 0.8rem !important;
-  }
-
-  .selected-venue-label {
-    max-width: 85px;
-  }
-}
 
 .api-badge {
   display: inline-flex;
@@ -702,3 +575,291 @@
   letter-spacing: 0.3px;
   border: 1px solid var(--violet-light);
 }
+
+/* ==========================================================================
+   RESPONSIVE MEDIA QUERIES (Al final del archivo para máxima especificidad)
+   ========================================================================== */
+
+/* --- Tablet y Móviles (< 768px) --- */
+@media (max-width: 768px) {
+  /* 1. Header y título achicado solo en responsive */
+  .header {
+    padding: 10px 14px !important;
+  }
+
+  .header .logo,
+  .logo {
+    font-size: 0.88rem !important;
+    line-height: 1.25;
+  }
+
+  .header .btn-secondary {
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .map-page-layout {
+    flex-direction: column-reverse;
+    height: calc(100vh - 54px);
+  }
+
+  /* 2. Ajuste de proporciones para dar más espacio al contenido en móviles */
+  .sidebar {
+    width: 100%;
+    height: 58%;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .map-container-wrapper {
+    width: 100%;
+    height: 42%;
+  }
+
+  /* 3. Filtros compactos */
+  .sidebar-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  /* 4. Achicar APIs en vivo para que entre en un solo renglón */
+  .api-badge {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    margin-top: 4px !important;
+    padding: 2px 7px !important;
+    font-size: 0.65rem !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    box-sizing: border-box !important;
+  }
+
+  .api-badge span {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* 5. Separar recintos y artistas en dos renglones */
+  .filter-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
+    width: 100% !important;
+  }
+
+  .filter-input,
+  .custom-select-trigger {
+    width: 100% !important;
+    padding: 7px 10px !important;
+    font-size: 0.82rem !important;
+    min-height: 36px !important;
+    box-sizing: border-box !important;
+  }
+
+  .selected-venue-label {
+    max-width: 250px;
+    font-size: 0.82rem;
+  }
+
+  .sidebar-header > div:last-child {
+    margin-top: 4px !important;
+    font-size: 0.7rem !important;
+  }
+
+  /* 6. Notificación sobre el mapa al tocar un estado: no choca con botones zoom (+/-) ni popups */
+  .map-overlay-badge {
+    top: 8px !important;
+    right: 8px !important;
+    left: 48px !important; /* Deja libre el control +/- de Leaflet */
+    padding: 4px 8px !important;
+    gap: 6px !important;
+    font-size: 0.7rem !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55) !important;
+  }
+
+  .map-overlay-badge > div {
+    min-width: 0 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .map-overlay-badge span {
+    font-size: 0.68rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .map-overlay-reset-btn {
+    padding: 2px 6px !important;
+    font-size: 0.65rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Notificación de selección en la barra lateral */
+  .active-selection-bar {
+    margin-top: 6px !important;
+    padding: 5px 8px !important;
+    gap: 6px !important;
+  }
+
+  .selection-info {
+    font-size: 0.72rem !important;
+    min-width: 0 !important;
+  }
+
+  .selection-info-text {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .btn-clear-selection {
+    padding: 2px 6px !important;
+    font-size: 0.68rem !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Popup del mapa compacto para que no tape la vista cartográfica */
+  .custom-popup .leaflet-popup-content-wrapper {
+    max-width: 240px !important;
+    padding: 2px 4px !important;
+  }
+
+  .custom-popup .leaflet-popup-content {
+    margin: 6px 8px !important;
+    font-size: 0.78rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .popup-venue-name {
+    font-size: 0.88rem !important;
+    margin-bottom: 3px !important;
+    padding-bottom: 2px !important;
+  }
+
+  .popup-event-item {
+    margin-bottom: 4px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .popup-event-selected {
+    padding: 4px 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .selected-tag-pill {
+    font-size: 0.58rem !important;
+    padding: 1px 4px !important;
+    margin-bottom: 2px !important;
+  }
+
+  /* Tarjetas de eventos más compactas en móvil */
+  .sidebar-content {
+    padding: 10px 14px 75px 14px;
+    gap: 10px;
+  }
+
+  .event-card {
+    padding: 10px 12px;
+  }
+
+  .event-artist {
+    font-size: 0.98rem;
+    margin-bottom: 3px;
+  }
+
+  .event-details {
+    font-size: 0.78rem;
+    gap: 2px;
+  }
+
+  .card-actions-row {
+    margin-top: 6px;
+  }
+}
+
+/* --- Smartphones medianos (< 480px) --- */
+@media (max-width: 480px) {
+  .header .logo,
+  .logo {
+    font-size: 0.82rem !important;
+  }
+
+  .api-badge {
+    font-size: 0.62rem !important;
+    padding: 2px 6px !important;
+    gap: 3px !important;
+  }
+
+  .map-overlay-badge {
+    left: 46px !important;
+    padding: 3px 6px !important;
+  }
+
+  .map-overlay-badge span {
+    font-size: 0.64rem !important;
+  }
+
+  .map-overlay-reset-btn {
+    font-size: 0.62rem !important;
+    padding: 2px 5px !important;
+  }
+
+  .selected-venue-label {
+    max-width: 200px;
+  }
+}
+
+/* --- Smartphones compactos (< 360px) --- */
+@media (max-width: 360px) {
+  .header .logo,
+  .logo {
+    font-size: 0.76rem !important;
+  }
+
+  .header .btn-secondary {
+    padding: 4px 7px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .api-badge {
+    font-size: 0.58rem !important;
+    padding: 2px 4px !important;
+  }
+
+  .map-overlay-badge {
+    left: 44px !important;
+  }
+
+  .map-overlay-badge span {
+    font-size: 0.6rem !important;
+  }
+
+  .map-overlay-reset-btn {
+    font-size: 0.58rem !important;
+    padding: 2px 4px !important;
+  }
+
+  .selected-venue-label {
+    max-width: 150px;
+  }
+}
