@@ -13,8 +13,9 @@
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  z-index: 10; /* Above map but below header */
-  box-shadow: 2px 0 15px rgba(0,0,0,0.5);
+  z-index: 10;
+  /* Above map but below header */
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(10px);
 }
 
@@ -131,6 +132,7 @@
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -217,6 +219,7 @@
 .sidebar-content::-webkit-scrollbar {
   width: 6px;
 }
+
 .sidebar-content::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
@@ -278,10 +281,12 @@
   border-radius: 8px;
   backdrop-filter: blur(5px);
 }
+
 .custom-popup .leaflet-popup-tip {
   background: rgba(20, 10, 30, 0.95);
   border: 1px solid var(--border-color);
 }
+
 .popup-venue-name {
   font-size: 1.1rem;
   font-weight: bold;
@@ -290,14 +295,17 @@
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 4px;
 }
+
 .popup-event-item {
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
+
 .popup-event-artist {
   font-weight: 600;
   color: #fff;
 }
+
 .popup-event-date {
   color: var(--text-muted);
   font-size: 0.8rem;
@@ -305,21 +313,129 @@
 
 /* Responsive adjustments for MapPage */
 @media (max-width: 768px) {
-  .map-page-layout {
-    flex-direction: column-reverse;
+
+  /* Achica el título principal y compacta el header solo en responsive */
+  .header {
+    padding: 10px 14px !important;
   }
 
+  .header .logo,
+  .logo {
+    font-size: 0.88rem !important;
+    line-height: 1.25;
+  }
+
+  .header .btn-secondary {
+    padding: 5px 10px !important;
+    font-size: 0.75rem !important;
+  }
+
+  .map-page-layout {
+    flex-direction: column-reverse;
+    height: calc(100vh - 54px);
+  }
+
+  /* Ajuste de proporciones para dar más espacio al contenido en móviles */
   .sidebar {
     width: 100%;
-    height: 50%;
+    height: 58%;
     border-right: none;
     border-top: 1px solid var(--border-color);
-    box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
+    box-shadow: 0 -2px 15px rgba(0, 0, 0, 0.5);
   }
 
   .map-container-wrapper {
     width: 100%;
-    height: 50%;
+    height: 42%;
+  }
+
+  /* El filtro ya NO ocupa todo en responsive: diseño compacto y optimizado */
+  .sidebar-header {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-header h2 {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+
+  .api-badge {
+    margin-top: 4px;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    gap: 4px;
+  }
+
+  /* Coloca los campos de filtro en grilla de 2 columnas para ahorrar espacio vertical */
+  .filter-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 8px !important;
+  }
+
+  .filter-input,
+  .custom-select-trigger {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    min-height: 36px;
+    box-sizing: border-box;
+  }
+
+  .selected-venue-label {
+    max-width: 110px;
+    font-size: 0.78rem;
+  }
+
+  .sidebar-header>div:last-child {
+    margin-top: 4px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .active-selection-bar {
+    margin-top: 6px;
+    padding: 5px 10px;
+  }
+
+  .active-selection-bar .selection-info {
+    font-size: 0.72rem;
+  }
+
+  /* Tarjetas de eventos más compactas en móvil */
+  .sidebar-content {
+    padding: 10px 14px 75px 14px;
+    gap: 10px;
+  }
+
+  .event-card {
+    padding: 10px 12px;
+  }
+
+  .event-artist {
+    font-size: 0.98rem;
+    margin-bottom: 3px;
+  }
+
+  .event-details {
+    font-size: 0.78rem;
+    gap: 2px;
+  }
+
+  .card-actions-row {
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 400px) {
+
+  .header .logo,
+  .logo {
+    font-size: 0.8rem !important;
+  }
+
+  .selected-venue-label {
+    max-width: 85px;
   }
 }
 
@@ -475,6 +591,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -585,4 +702,3 @@
   letter-spacing: 0.3px;
   border: 1px solid var(--violet-light);
 }
-
