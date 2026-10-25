@@ -350,16 +350,21 @@
 }
 
 .custom-popup .leaflet-popup-content {
-  margin: 18px 20px !important;
+  margin: 16px 6px 14px 16px !important;
+  padding-right: 12px !important;
   width: auto !important;
   max-height: 380px !important;
   overflow-y: auto !important;
   line-height: 1.4 !important;
-  padding-right: 4px !important;
 }
 
 .custom-popup .leaflet-popup-content::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
 }
 
 .custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb {

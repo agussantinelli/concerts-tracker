@@ -111,26 +111,16 @@ function MapPage() {
     setLoading(true);
     setApiStatus('CONNECTING');
     try {
-      // 1. Obtener recintos oficiales en tiempo real desde APIs abiertas (MusicBrainz & OpenStreetMap)
+      // 1. Obtener recintos oficiales de Rosario (35 escenarios)
       const venuesResult = await fetchLiveVenues();
       
-      // 2. Obtener eventos en tiempo real desde Bandsintown Live API y MusicBrainz Events
+      // 2. Obtener eventos en tiempo real desde Bandsintown Live API
       const eventsResult = await fetchLiveEvents(venuesResult.venues);
 
-      // Unificar recintos base con cualquier escenario dinámico detectado en las giras en vivo
-      const allVenues = [...venuesResult.venues];
-      if (eventsResult.extraVenues) {
-        for (const evVenue of eventsResult.extraVenues) {
-          if (!allVenues.some(v => v.id.toString() === evVenue.id.toString())) {
-            allVenues.push(evVenue);
-          }
-        }
-      }
-
-      setVenues(allVenues);
+      setVenues(venuesResult.venues);
       setEvents(eventsResult.events);
 
-      if (venuesResult.isLive || eventsResult.isLive || allVenues.length > 0) {
+      if (venuesResult.venues.length > 0) {
         setApiStatus('LIVE');
       } else {
         setApiStatus('ERROR');
