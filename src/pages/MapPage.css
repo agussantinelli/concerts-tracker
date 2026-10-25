@@ -347,6 +347,26 @@
   border-radius: 12px;
   font-weight: 500;
   margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.api-badge.live {
+  background: #24103a;
+  border-color: #7c3aed;
+  color: #f3e8ff;
+}
+
+.api-badge.connecting {
+  background: #2b1704;
+  border-color: #f59e0b;
+  color: #fef3c7;
+}
+
+.api-badge.error {
+  background: #3b1016;
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
 }
 
 .api-badge-dot {
@@ -355,6 +375,79 @@
   border-radius: 50%;
   background-color: #22c55e;
   box-shadow: 0 0 8px #22c55e;
+}
+
+.api-badge-dot.live {
+  background-color: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.api-badge-dot.connecting {
+  background-color: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+}
+
+.api-badge-dot.error {
+  background-color: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+.api-retry-btn {
+  background: rgba(239, 68, 68, 0.25);
+  border: 1px solid #ef4444;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-left: 4px;
+}
+
+.api-retry-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.btn-retry-large {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.btn-retry-large:hover {
+  background: #dc2626;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+}
+
+.api-error-container {
+  padding: 20px 10px;
 }
 
 .venue-tag {
@@ -655,7 +748,7 @@
   .api-badge {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 5px !important;
+    gap: 4px !important;
     margin-top: 4px !important;
     padding: 2px 7px !important;
     font-size: 0.65rem !important;
@@ -666,10 +759,23 @@
     box-sizing: border-box !important;
   }
 
+  .api-badge.error {
+    background: #3b1016 !important;
+    border-color: #ef4444 !important;
+    color: #fca5a5 !important;
+  }
+
   .api-badge span {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
+  }
+
+  .api-retry-btn {
+    padding: 1px 5px !important;
+    font-size: 0.62rem !important;
+    gap: 3px !important;
+    margin-left: 2px !important;
   }
 
   /* 5. Separar recintos y artistas en dos renglones */

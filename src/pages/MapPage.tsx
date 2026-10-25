@@ -15,7 +15,8 @@ import {
   FaTimes,
   FaEye,
   FaSearch,
-  FaHome
+  FaHome,
+  FaSyncAlt
 } from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
@@ -66,7 +67,7 @@ function MapPage() {
 
   const [venues, setVenues] = useState<Venue[]>([]);
   const [events, setEvents] = useState<ConcertEvent[]>([]);
-  const [isLiveApi, setIsLiveApi] = useState(false);
+  const [apiStatus, setApiStatus] = useState<'CONNECTING' | 'LIVE' | 'ERROR'>('CONNECTING');
   const [loading, setLoading] = useState(true);
 
   const [artistFilter, setArtistFilter] = useState('');
@@ -106,32 +107,44 @@ function MapPage() {
     return venues.find(v => v.id.toString() === selectedEvent.venueId.toString()) || null;
   }, [venues, selectedEvent]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const loadDataFromApis = async () => {
+    setLoading(true);
+    setApiStatus('CONNECTING');
+    try {
+      // 1. Obtener recintos oficiales en tiempo real desde APIs abiertas (MusicBrainz & OpenStreetMap)
+      const venuesResult = await fetchLiveVenues();
+      
+      // 2. Obtener eventos en tiempo real desde Bandsintown Live API y MusicBrainz Events
+      const eventsResult = await fetchLiveEvents(venuesResult.venues);
 
-    async function loadDataFromApis() {
-      setLoading(true);
-      try {
-        // 1. Obtener recintos oficiales en tiempo real desde OpenStreetMap Nominatim (0% hardcoding)
-        const venuesResult = await fetchLiveVenues();
-        
-        // 2. Obtener eventos en tiempo real desde Bandsintown Live API unificados a recintos de OSM
-        const eventsResult = await fetchLiveEvents(venuesResult.venues);
-
-        if (isMounted) {
-          setVenues(venuesResult.venues);
-          setEvents(eventsResult.events);
-          setIsLiveApi(venuesResult.isLive);
-          setLoading(false);
+      // Unificar recintos base con cualquier escenario dinámico detectado en las giras en vivo
+      const allVenues = [...venuesResult.venues];
+      if (eventsResult.extraVenues) {
+        for (const evVenue of eventsResult.extraVenues) {
+          if (!allVenues.some(v => v.id.toString() === evVenue.id.toString())) {
+            allVenues.push(evVenue);
+          }
         }
-      } catch (err) {
-        console.error('Error cargando fuentes de información espacial en tiempo real:', err);
-        if (isMounted) setLoading(false);
       }
-    }
 
+      setVenues(allVenues);
+      setEvents(eventsResult.events);
+
+      if (venuesResult.isLive || eventsResult.isLive || allVenues.length > 0) {
+        setApiStatus('LIVE');
+      } else {
+        setApiStatus('ERROR');
+      }
+    } catch (err) {
+      console.error('Error cargando fuentes de información espacial en tiempo real:', err);
+      setApiStatus('ERROR');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     void loadDataFromApis();
-    return () => { isMounted = false; };
   }, []);
 
   // Validación y filtrado reactivo de eventos:
@@ -227,12 +240,39 @@ function MapPage() {
             </div>
             
             {/* Indicador de estado de las múltiples APIs en tiempo real */}
-            <div className="api-badge" title="Geoservicios y eventos conectados en tiempo real">
-              <span className="api-badge-dot" style={{ backgroundColor: isLiveApi ? '#22c55e' : '#f59e0b' }}></span>
+            <div 
+              className={`api-badge ${apiStatus === 'LIVE' ? 'live' : apiStatus === 'ERROR' ? 'error' : 'connecting'}`} 
+              title={
+                apiStatus === 'LIVE' 
+                  ? 'Geoservicios y eventos conectados en tiempo real' 
+                  : apiStatus === 'ERROR' 
+                    ? 'No se pudo conectar con las APIs. Hacé clic en reintentar' 
+                    : 'Conectando con APIs en tiempo real...'
+              }
+            >
+              <span 
+                className={`api-badge-dot ${apiStatus === 'LIVE' ? 'live' : apiStatus === 'ERROR' ? 'error' : 'connecting'}`}
+              ></span>
               <FaBroadcastTower size={12} />
               <span>
-                {isLiveApi ? 'APIs en Vivo: OpenStreetMap + Bandsintown' : 'Conectando con APIs...'}
+                {apiStatus === 'LIVE' && 'APIs en Vivo: OpenStreetMap + Bandsintown'}
+                {apiStatus === 'CONNECTING' && 'Conectando con APIs...'}
+                {apiStatus === 'ERROR' && 'Sin conexión con APIs'}
               </span>
+              {apiStatus === 'ERROR' && (
+                <button 
+                  type="button"
+                  className="api-retry-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    void loadDataFromApis();
+                  }}
+                  title="Reintentar conexión con las APIs"
+                >
+                  <FaSyncAlt size={10} className={loading ? 'spinning' : ''} />
+                  <span>Reintentar</span>
+                </button>
+              )}
             </div>
 
             <div className="filter-group" style={{ marginTop: '14px' }}>
@@ -332,13 +372,33 @@ function MapPage() {
               if (loading) {
                 return (
                   <div className="no-results">
+                    <FaBroadcastTower size={24} style={{ color: 'var(--violet-light)', marginBottom: '8px', display: 'block', margin: '0 auto 8px' }} />
                     Consultando APIs en tiempo real (Bandsintown, MusicBrainz & OpenStreetMap)...
+                  </div>
+                );
+              }
+              if (apiStatus === 'ERROR' && filteredEvents.length === 0) {
+                return (
+                  <div className="no-results api-error-container">
+                    <FaBroadcastTower size={26} color="#ef4444" style={{ marginBottom: '8px', display: 'block', margin: '0 auto 8px' }} />
+                    <p style={{ color: '#fca5a5', fontWeight: 500, margin: '0 0 12px 0' }}>
+                      No se pudo conectar con las APIs de eventos y recintos en este momento.
+                    </p>
+                    <button 
+                      type="button" 
+                      className="btn-retry-large"
+                      onClick={() => void loadDataFromApis()}
+                    >
+                      <FaSyncAlt size={12} className={loading ? 'spinning' : ''} />
+                      Reintentar conexión
+                    </button>
                   </div>
                 );
               }
               if (filteredEvents.length === 0) {
                 return (
                   <div className="no-results">
+                    <FaMusic size={22} color="var(--violet-light)" style={{ marginBottom: '8px', opacity: 0.7 }} />
                     <p>No se encontraron conciertos programados a partir del día de la fecha.</p>
                   </div>
                 );
