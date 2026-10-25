@@ -209,8 +209,16 @@ function MapPage() {
   return (
     <div className="map-page-container">
       <header className="header" style={{ padding: '20px 5%', background: 'var(--bg-dark)', maxWidth: '100%', boxSizing: 'border-box' }}>
-        <h1 className="logo" style={{ fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-          <FaMusic size={15} color="var(--violet-light)" /> Concerts Tracker - Mapa interactivo
+        <h1 className="logo" style={{ fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+          <img 
+            src={`${import.meta.env.BASE_URL}logo.png`} 
+            alt="Logo" 
+            className="header-logo-img" 
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = './logo.png';
+            }}
+          />
+          <span>Concerts Tracker - Mapa interactivo</span>
         </h1>
         <nav className="nav">
           <Link to="/">
