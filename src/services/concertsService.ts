@@ -18,58 +18,59 @@ export function getDistanceMeters(lat1: number, lon1: number, lat2: number, lon2
   return R * c;
 }
 
+const NAME_TYPE_PATTERNS: Array<[RegExp, string]> = [
+  [/anfiteatro/i, 'Anfiteatro'],
+  [/estadio|bielsa|arroyito/i, 'Estadio'],
+  [/teatro|c[íi]rculo|broadway|astengo|lavard[ée]n|comedia/i, 'Teatro'],
+  [/hip[óo]dromo|predio/i, 'Hipódromo / Predio'],
+  [/arena|metropolitano|bioceres/i, 'Arena / Salón'],
+  [/galp[óo]n/i, 'Galpón Cultural'],
+  [/parque de espa[ñn]a|centro cultural/i, 'Centro Cultural'],
+  [/fluvial/i, 'Espacio al Aire Libre'],
+];
+
+const RAW_TYPE_MAP: Record<string, string> = {
+  amphitheatre: 'Anfiteatro',
+  amphitheater: 'Anfiteatro',
+  venue: 'Sala de Conciertos',
+  'concert hall': 'Sala de Conciertos',
+  concerthall: 'Sala de Conciertos',
+  club: 'Club Musical / Bar',
+  bar: 'Club Musical / Bar',
+  theatre: 'Teatro',
+  theater: 'Teatro',
+  stadium: 'Estadio',
+  arena: 'Arena / Salón',
+  studio: 'Estudio',
+  stage: 'Escenario',
+  'arts centre': 'Centro Cultural',
+  arts_centre: 'Centro Cultural',
+  'cultural centre': 'Centro Cultural',
+  other: 'Espacio Cultural',
+};
+
 /**
  * Normaliza y traduce de forma determinística los tipos de recintos al español estándar
  */
 export function translateVenueType(rawType?: string, name: string = ''): string {
-  const lowerName = name.toLowerCase();
-  if (lowerName.includes('anfiteatro')) return 'Anfiteatro';
-  if (lowerName.includes('estadio') || lowerName.includes('bielsa') || lowerName.includes('arroyito')) return 'Estadio';
-  if (lowerName.includes('teatro') || lowerName.includes('círculo') || lowerName.includes('circulo') || lowerName.includes('broadway') || lowerName.includes('astengo') || lowerName.includes('lavardén') || lowerName.includes('lavarden') || lowerName.includes('comedia')) return 'Teatro';
-  if (lowerName.includes('hipódromo') || lowerName.includes('hipodromo') || lowerName.includes('predio')) return 'Hipódromo / Predio';
-  if (lowerName.includes('arena') || lowerName.includes('metropolitano') || lowerName.includes('bioceres')) return 'Arena / Salón';
-  if (lowerName.includes('galpón') || lowerName.includes('galpon')) return 'Galpón Cultural';
-  if (lowerName.includes('parque de españa') || lowerName.includes('centro cultural')) return 'Centro Cultural';
-  if (lowerName.includes('fluvial')) return 'Espacio al Aire Libre';
+  for (const [pattern, translation] of NAME_TYPE_PATTERNS) {
+    if (pattern.test(name)) {
+      return translation;
+    }
+  }
 
   const lowerType = (rawType || '').toLowerCase().trim();
-  switch (lowerType) {
-    case 'amphitheatre':
-    case 'amphitheater':
-      return 'Anfiteatro';
-    case 'venue':
-    case 'concert hall':
-    case 'concerthall':
-      return 'Sala de Conciertos';
-    case 'club':
-    case 'bar':
-      return 'Club Musical / Bar';
-    case 'theatre':
-    case 'theater':
-      return 'Teatro';
-    case 'stadium':
-      return 'Estadio';
-    case 'arena':
-      return 'Arena / Salón';
-    case 'studio':
-      return 'Estudio';
-    case 'stage':
-      return 'Escenario';
-    case 'arts centre':
-    case 'arts_centre':
-    case 'cultural centre':
-      return 'Centro Cultural';
-    case 'other':
-      return 'Espacio Cultural';
-    default:
-      if (lowerType.includes('amphi') || lowerType.includes('anfi')) return 'Anfiteatro';
-      if (lowerType.includes('theat') || lowerType.includes('teatr')) return 'Teatro';
-      if (lowerType.includes('stad') || lowerType.includes('estad')) return 'Estadio';
-      if (lowerType.includes('aren')) return 'Arena / Salón';
-      if (lowerType.includes('club') || lowerType.includes('bar')) return 'Club Musical / Bar';
-      if (lowerType.includes('cultur')) return 'Centro Cultural';
-      return 'Sala de Conciertos';
+  if (RAW_TYPE_MAP[lowerType]) {
+    return RAW_TYPE_MAP[lowerType];
   }
+
+  for (const [pattern, translation] of NAME_TYPE_PATTERNS) {
+    if (pattern.test(lowerType)) {
+      return translation;
+    }
+  }
+
+  return 'Sala de Conciertos';
 }
 
 let liveVenuesCache: Venue[] = [];

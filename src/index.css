@@ -65,6 +65,17 @@ body {
   100% { transform: scale(1) translate(0, 0); opacity: 1; }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .bg-glow,
+  .bg-glow-secondary {
+    animation: none;
+  }
+
+  .feature-card {
+    transition: none;
+  }
+}
+
 /* Header */
 .header {
   width: 100%;

@@ -62,6 +62,52 @@ function MapController({
   return null;
 }
 
+function filterConcertEvents(
+  events: ConcertEvent[],
+  artistFilter: string,
+  venueFilter: string,
+  today: string
+): ConcertEvent[] {
+  const lowerArtist = artistFilter.toLowerCase();
+  return events
+    .filter(event => {
+      if (!event.date || event.date < today) return false;
+      const matchArtist = event.artist.toLowerCase().includes(lowerArtist);
+      const matchVenue = venueFilter === 'ALL' || event.venueId.toString() === venueFilter;
+      return matchArtist && matchVenue;
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+}
+
+function resolveActiveVenues(
+  selectedEventVenue: Venue | null,
+  venueFilter: string,
+  artistFilter: string,
+  venues: Venue[],
+  filteredEvents: ConcertEvent[]
+): Venue[] {
+  if (selectedEventVenue) return [selectedEventVenue];
+  if (venueFilter !== 'ALL') return venues.filter(v => v.id.toString() === venueFilter);
+  if (artistFilter.trim()) {
+    const activeIds = new Set(filteredEvents.map(e => e.venueId.toString()));
+    return venues.filter(v => activeIds.has(v.id.toString()));
+  }
+  return venues;
+}
+
+function resolveMapTarget(
+  selectedEventVenue: Venue | null,
+  selectedVenue: Venue | null,
+  rosarioPosition: [number, number]
+): { targetPos: [number, number]; targetZoom: number } {
+  const activeFocus = selectedEventVenue || selectedVenue;
+  if (activeFocus) {
+    const [vLat, vLon] = activeFocus.pos;
+    return { targetPos: [vLat + 0.0065, vLon], targetZoom: 15 };
+  }
+  return { targetPos: rosarioPosition, targetZoom: 13 };
+}
+
 function MapPage() {
   const rosarioPosition: [number, number] = [-32.9468, -60.6393];
 
@@ -94,7 +140,7 @@ function MapPage() {
   }, []);
 
   const selectedVenue = useMemo(() => {
-    return venues.find(v => v.id.toString() === venueFilter);
+    return venues.find(v => v.id.toString() === venueFilter) || null;
   }, [venues, venueFilter]);
 
   const selectedEvent = useMemo(() => {
@@ -111,20 +157,12 @@ function MapPage() {
     setLoading(true);
     setApiStatus('CONNECTING');
     try {
-      // 1. Obtener recintos oficiales de Rosario (35 escenarios)
       const venuesResult = await fetchLiveVenues();
-      
-      // 2. Obtener eventos en tiempo real desde Bandsintown Live API
       const eventsResult = await fetchLiveEvents(venuesResult.venues);
 
       setVenues(venuesResult.venues);
       setEvents(eventsResult.events);
-
-      if (venuesResult.venues.length > 0) {
-        setApiStatus('LIVE');
-      } else {
-        setApiStatus('ERROR');
-      }
+      setApiStatus(venuesResult.venues.length > 0 ? 'LIVE' : 'ERROR');
     } catch (err) {
       console.error('Error cargando fuentes de información espacial en tiempo real:', err);
       setApiStatus('ERROR');
@@ -137,32 +175,16 @@ function MapPage() {
     void loadDataFromApis();
   }, []);
 
-  // Validación y filtrado reactivo de eventos:
-  // 1. Muestra SIEMPRE y ÚNICAMENTE recitales en el día de la fecha o posteriores
-  // 2. Ordena automáticamente en orden cronológico ascendente (el más próximo primero)
   const filteredEvents = useMemo(() => {
-    return events
-      .filter(event => {
-        // Validación estricta: sólo fechas posteriores o iguales a hoy
-        if (!event.date || event.date < today) {
-          return false;
-        }
-
-        const matchArtist = event.artist.toLowerCase().includes(artistFilter.toLowerCase());
-        const matchVenue = venueFilter === 'ALL' || event.venueId.toString() === venueFilter;
-        return matchArtist && matchVenue;
-      })
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return filterConcertEvents(events, artistFilter, venueFilter, today);
   }, [events, artistFilter, venueFilter, today]);
 
-  // Si el concierto seleccionado deja de estar en la lista filtrada, deseleccionar automáticamente
   useEffect(() => {
     if (selectedEventId && !filteredEvents.some(e => e.id.toString() === selectedEventId.toString())) {
       setSelectedEventId(null);
     }
   }, [filteredEvents, selectedEventId]);
 
-  // Abrir automáticamente el popup del marcador seleccionado
   useEffect(() => {
     if (selectedEventId && markerRef.current) {
       const timer = setTimeout(() => {
@@ -172,38 +194,12 @@ function MapPage() {
     }
   }, [selectedEventId]);
 
-  // Derivar qué recintos mostrar en la cartografía
   const activeVenues = useMemo(() => {
-    // Si el usuario seleccionó un concierto específico en la barra lateral, marcar ÚNICAMENTE ese recinto
-    if (selectedEventVenue) {
-      return [selectedEventVenue];
-    }
-    // Si seleccionó un recinto desde el menú desplegable
-    if (venueFilter !== 'ALL') {
-      return venues.filter(v => v.id.toString() === venueFilter);
-    }
-    // Si el usuario filtró por artista, mostrar solo los recintos donde toca
-    if (artistFilter.trim()) {
-      const activeIds = new Set(filteredEvents.map(e => e.venueId.toString()));
-      return venues.filter(v => activeIds.has(v.id.toString()));
-    }
-    // Si no hay filtro de artista ni selección individual, mostrar todos los escenarios
-    return venues;
+    return resolveActiveVenues(selectedEventVenue, venueFilter, artistFilter, venues, filteredEvents);
   }, [venues, filteredEvents, venueFilter, artistFilter, selectedEventVenue]);
 
-  // Calcular la posición y nivel de zoom hacia donde debe animar el mapa
   const { targetPos, targetZoom } = useMemo(() => {
-    if (selectedEventVenue) {
-      // Offset de latitud (+0.0065) hacia el norte para que el marcador quede en la mitad inferior
-      // y el popup (que abre hacia arriba) se vea entero y espacioso sin cortarse contra el borde superior del mapa
-      const [vLat, vLon] = selectedEventVenue.pos;
-      return { targetPos: [vLat + 0.0065, vLon] as [number, number], targetZoom: 15 };
-    }
-    if (selectedVenue) {
-      const [vLat, vLon] = selectedVenue.pos;
-      return { targetPos: [vLat + 0.0065, vLon] as [number, number], targetZoom: 15 };
-    }
-    return { targetPos: rosarioPosition, targetZoom: 13 };
+    return resolveMapTarget(selectedEventVenue, selectedVenue, rosarioPosition);
   }, [selectedEventVenue, selectedVenue, rosarioPosition]);
 
   return (
@@ -577,8 +573,16 @@ function MapPage() {
                                 return (
                                   <div 
                                     key={ev.id} 
+                                    role="button"
+                                    tabIndex={0}
                                     className={`popup-event-card ${isThisConcertSelected ? 'selected' : ''}`}
                                     onClick={() => setSelectedEventId(isThisConcertSelected ? null : ev.id)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter' || e.key === ' ') {
+                                        e.preventDefault();
+                                        setSelectedEventId(isThisConcertSelected ? null : ev.id);
+                                      }
+                                    }}
                                     title="Haz clic para seleccionar este recital"
                                   >
                                     {isThisConcertSelected && (
