@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { FaCompass } from 'react-icons/fa';
 
 function Home() {
   return (
@@ -14,7 +15,10 @@ function Home() {
         </p>
         <div className="cta-group" style={{ justifyContent: 'center' }}>
           <Link to="/map">
-            <button className="btn-primary large" style={{ fontSize: '1.2rem', padding: '15px 40px' }}>Explorar</button>
+            <button className="btn-primary large" style={{ fontSize: '1.2rem', padding: '15px 40px', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
+              <FaCompass size={20} />
+              Explorar
+            </button>
           </Link>
         </div>
       </main>

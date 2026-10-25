@@ -13,7 +13,9 @@ import {
   FaChevronDown,
   FaCheck,
   FaTimes,
-  FaEye
+  FaEye,
+  FaSearch,
+  FaHome
 } from 'react-icons/fa';
 import 'leaflet/dist/leaflet.css';
 import './MapPage.css';
@@ -200,10 +202,14 @@ function MapPage() {
   return (
     <div className="map-page-container">
       <header className="header" style={{ padding: '20px 5%', background: 'var(--bg-dark)', maxWidth: '100%', boxSizing: 'border-box' }}>
-        <h1 className="logo" style={{ fontSize: '1.2rem' }}>Concerts Tracker - Mapa interactivo</h1>
+        <h1 className="logo" style={{ fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+          <FaMusic size={15} color="var(--violet-light)" /> Concerts Tracker - Mapa interactivo
+        </h1>
         <nav className="nav">
           <Link to="/">
-            <button className="btn-secondary">Volver al Inicio</button>
+            <button className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <FaHome size={12} /> Volver al Inicio
+            </button>
           </Link>
         </nav>
       </header>
@@ -230,13 +236,16 @@ function MapPage() {
             </div>
 
             <div className="filter-group" style={{ marginTop: '14px' }}>
-              <input 
-                type="text" 
-                className="filter-input" 
-                placeholder="Buscar por artista..." 
-                value={artistFilter}
-                onChange={(e) => setArtistFilter(e.target.value)}
-              />
+              <div className="search-input-wrapper">
+                <FaSearch className="search-input-icon" size={13} />
+                <input 
+                  type="text" 
+                  className="filter-input with-search-icon" 
+                  placeholder="Buscar por artista..." 
+                  value={artistFilter}
+                  onChange={(e) => setArtistFilter(e.target.value)}
+                />
+              </div>
               {/* Dropdown Personalizado con Glassmorphism */}
               <div className="custom-select-wrapper" ref={dropdownRef}>
                 <button 
