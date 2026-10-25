@@ -1,13 +1,13 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import { 
-  FaMapMarkerAlt, 
-  FaCalendarAlt, 
-  FaMusic, 
-  FaTicketAlt, 
-  FaFilter, 
-  FaBroadcastTower, 
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaMusic,
+  FaTicketAlt,
+  FaFilter,
+  FaBroadcastTower,
   FaSortAmountDownAlt,
   FaExternalLinkAlt,
   FaChevronDown,
@@ -42,11 +42,11 @@ const DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // Controlador de cámara de Leaflet para centrar y animar fluidamente el mapa al seleccionar
-function MapController({ 
-  targetPos, 
-  zoom 
-}: { 
-  targetPos: [number, number]; 
+function MapController({
+  targetPos,
+  zoom
+}: {
+  targetPos: [number, number];
   zoom: number;
 }) {
   const map = useMap();
@@ -122,7 +122,7 @@ function MapPage() {
   const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const markerRef = useRef<L.Marker | null>(null);
-  
+
   // Fecha actual (formato YYYY-MM-DD) para filtrar siempre conciertos a partir de hoy
   const today = useMemo(() => new Date().toISOString().split('T')[0], []);
 
@@ -206,10 +206,10 @@ function MapPage() {
     <div className="map-page-container">
       <header className="header" style={{ padding: '20px 5%', background: 'var(--bg-dark)', maxWidth: '100%', boxSizing: 'border-box' }}>
         <h1 className="logo" style={{ fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
-          <img 
-            src={`${import.meta.env.BASE_URL}logo.png`} 
-            alt="Logo" 
-            className="header-logo-img" 
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="Logo"
+            className="header-logo-img"
             onError={(e) => {
               (e.target as HTMLImageElement).src = './logo.png';
             }}
@@ -224,31 +224,31 @@ function MapPage() {
           </Link>
         </nav>
       </header>
-      
+
       <div className="map-page-layout">
-        
+
         {/* Sidebar UI for Filters and List */}
         <aside className="sidebar">
           <div className="sidebar-header">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2><FaFilter size={18} style={{ marginRight: '8px' }}/> Filtros</h2>
+              <h2><FaFilter size={18} style={{ marginRight: '8px' }} /> Filtros</h2>
               <span style={{ fontSize: '0.75rem', color: '#c084fc', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <FaSortAmountDownAlt size={12} /> Cronológico
               </span>
             </div>
-            
+
             {/* Indicador de estado de las múltiples APIs en tiempo real */}
-            <div 
-              className={`api-badge ${apiStatus === 'LIVE' ? 'live' : apiStatus === 'ERROR' ? 'error' : 'connecting'}`} 
+            <div
+              className={`api-badge ${apiStatus === 'LIVE' ? 'live' : apiStatus === 'ERROR' ? 'error' : 'connecting'}`}
               title={
-                apiStatus === 'LIVE' 
-                  ? 'Geoservicios y eventos conectados en tiempo real' 
-                  : apiStatus === 'ERROR' 
-                    ? 'No se pudo conectar con las APIs. Hacé clic en reintentar' 
+                apiStatus === 'LIVE'
+                  ? 'Geoservicios y eventos conectados en tiempo real'
+                  : apiStatus === 'ERROR'
+                    ? 'No se pudo conectar con las APIs. Hacé clic en reintentar'
                     : 'Conectando con APIs en tiempo real...'
               }
             >
-              <span 
+              <span
                 className={`api-badge-dot ${apiStatus === 'LIVE' ? 'live' : apiStatus === 'ERROR' ? 'error' : 'connecting'}`}
               ></span>
               <FaBroadcastTower size={12} />
@@ -258,7 +258,7 @@ function MapPage() {
                 {apiStatus === 'ERROR' && 'Sin conexión con APIs'}
               </span>
               {apiStatus === 'ERROR' && (
-                <button 
+                <button
                   type="button"
                   className="api-retry-btn"
                   onClick={(e) => {
@@ -276,17 +276,17 @@ function MapPage() {
             <div className="filter-group" style={{ marginTop: '14px' }}>
               <div className="search-input-wrapper">
                 <FaSearch className="search-input-icon" size={13} />
-                <input 
-                  type="text" 
-                  className="filter-input with-search-icon" 
-                  placeholder="Buscar por artista..." 
+                <input
+                  type="text"
+                  className="filter-input with-search-icon"
+                  placeholder="Buscar por artista..."
                   value={artistFilter}
                   onChange={(e) => setArtistFilter(e.target.value)}
                 />
               </div>
               {/* Dropdown Personalizado con Glassmorphism */}
               <div className="custom-select-wrapper" ref={dropdownRef}>
-                <button 
+                <button
                   type="button"
                   className={`custom-select-trigger ${isVenueDropdownOpen ? 'open' : ''}`}
                   onClick={() => setIsVenueDropdownOpen(!isVenueDropdownOpen)}
@@ -302,7 +302,7 @@ function MapPage() {
 
                 {isVenueDropdownOpen && (
                   <div className="custom-select-options">
-                    <button 
+                    <button
                       type="button"
                       className={`custom-select-option ${venueFilter === 'ALL' && !selectedEventId ? 'active' : ''}`}
                       onClick={() => {
@@ -316,7 +316,7 @@ function MapPage() {
                     </button>
 
                     {venues.map(v => (
-                      <button 
+                      <button
                         type="button"
                         key={v.id}
                         className={`custom-select-option ${venueFilter === v.id.toString() ? 'active' : ''}`}
@@ -348,8 +348,8 @@ function MapPage() {
                     Marcado: <strong>{selectedEvent.artist}</strong> ({selectedEventVenue?.name})
                   </span>
                 </div>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className="btn-clear-selection"
                   onClick={() => setSelectedEventId(null)}
                   title="Mostrar todos los recintos en el mapa"
@@ -382,8 +382,8 @@ function MapPage() {
                     <p style={{ color: '#fca5a5', fontWeight: 500, margin: '0 0 12px 0' }}>
                       No se pudo conectar con las APIs de eventos y recintos en este momento.
                     </p>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="btn-retry-large"
                       onClick={() => void loadDataFromApis()}
                     >
@@ -407,8 +407,8 @@ function MapPage() {
                 const isSelected = selectedEventId !== null && event.id.toString() === selectedEventId.toString();
 
                 return (
-                  <div 
-                    key={event.id} 
+                  <div
+                    key={event.id}
                     className={`event-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => {
                       setSelectedEventId(isSelected ? null : event.id);
@@ -442,7 +442,7 @@ function MapPage() {
 
                     <div className="event-details">
                       <div className="event-details-row venue-row">
-                        <FaMapMarkerAlt color="var(--violet-electric)" /> 
+                        <FaMapMarkerAlt color="var(--violet-electric)" />
                         <span className="venue-name-highlight">{venue?.name || event.venueName || 'Recinto'}</span>
                       </div>
                       <div className="event-details-row">
@@ -455,10 +455,10 @@ function MapPage() {
 
                     <div className="card-actions-row">
                       {event.ticketUrl && (
-                        <a 
-                          href={event.ticketUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
+                        <a
+                          href={event.ticketUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="ticket-link-btn"
                           onClick={(e) => e.stopPropagation()}
                         >
@@ -466,7 +466,7 @@ function MapPage() {
                         </a>
                       )}
 
-                      <button 
+                      <button
                         type="button"
                         className={`card-locate-btn ${isSelected ? 'active' : ''}`}
                         onClick={(e) => {
@@ -494,9 +494,9 @@ function MapPage() {
                 <FaMapMarkerAlt size={12} color="var(--violet-light)" />
                 <span>Mostrando únicamente: <strong>{selectedEventVenue.name}</strong> ({selectedEvent.artist})</span>
               </div>
-              <button 
-                type="button" 
-                onClick={() => setSelectedEventId(null)} 
+              <button
+                type="button"
+                onClick={() => setSelectedEventId(null)}
                 className="map-overlay-reset-btn"
                 title="Volver a mostrar todos los recintos"
               >
@@ -513,22 +513,22 @@ function MapPage() {
 
             {/* Controlador reactivo para animar la vista al seleccionar recitales */}
             <MapController targetPos={targetPos} zoom={targetZoom} />
-            
+
             {activeVenues.map((venue) => {
               // Encuentra eventos para este recinto específico, ordenados por fecha
               const venueEvents = filteredEvents
                 .filter(e => e.venueId.toString() === venue.id.toString())
                 .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-              
+
               const isSelectedVenue = selectedEventVenue?.id.toString() === venue.id.toString();
 
               return (
-                <Marker 
-                  key={venue.id} 
+                <Marker
+                  key={venue.id}
                   position={venue.pos}
                   ref={isSelectedVenue ? (ref) => { markerRef.current = ref; } : undefined}
                 >
-                  <Popup 
+                  <Popup
                     className="custom-popup"
                     autoPan={true}
                     autoPanPaddingTopLeft={[25, 95]}
@@ -571,8 +571,8 @@ function MapPage() {
                               {venueEvents.map(ev => {
                                 const isThisConcertSelected = selectedEventId !== null && ev.id.toString() === selectedEventId.toString();
                                 return (
-                                  <div 
-                                    key={ev.id} 
+                                  <div
+                                    key={ev.id}
                                     role="button"
                                     tabIndex={0}
                                     className={`popup-event-card ${isThisConcertSelected ? 'selected' : ''}`}
@@ -591,7 +591,7 @@ function MapPage() {
                                       </div>
                                     )}
                                     <div className="popup-artist-name">{ev.artist}</div>
-                                    
+
                                     <div className="popup-event-meta">
                                       <div className="popup-meta-item">
                                         <FaCalendarAlt size={11} className="popup-meta-icon" />
@@ -605,29 +605,19 @@ function MapPage() {
                                       )}
                                     </div>
 
-                                    <div className="popup-event-actions">
-                                      {ev.ticketUrl && (
-                                        <a 
-                                          href={ev.ticketUrl} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer" 
+                                    {ev.ticketUrl && (
+                                      <div className="popup-event-actions">
+                                        <a
+                                          href={ev.ticketUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
                                           className="popup-ticket-btn"
                                           onClick={(e) => e.stopPropagation()}
                                         >
                                           <FaTicketAlt size={11} /> Entradas oficiales <FaExternalLinkAlt size={8} />
                                         </a>
-                                      )}
-                                      <button
-                                        type="button"
-                                        className={`popup-select-btn ${isThisConcertSelected ? 'active' : ''}`}
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          setSelectedEventId(isThisConcertSelected ? null : ev.id);
-                                        }}
-                                      >
-                                        {isThisConcertSelected ? 'Desmarcar' : 'Ver detalle'}
-                                      </button>
-                                    </div>
+                                      </div>
+                                    )}
                                   </div>
                                 );
                               })}
