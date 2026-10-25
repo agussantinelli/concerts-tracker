@@ -1,7 +1,7 @@
 <h1 align="center">🎵 Concerts Tracker - Web de Eventos Musicales</h1>
 
 <p align="center">
-  <img src="public\logo.png" alt="Concerts Tracker Logo" width="200" height="200">
+  <img src="public/logo.png" alt="Concerts Tracker Logo" width="200" height="200">
 </p>
 
 <div align="center">
@@ -32,7 +32,6 @@
 </p>
 <p align="center">
     <img src="https://img.shields.io/badge/OpenStreetMap-Cartografía_y_Tiles-7EBC6F?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="OpenStreetMap Badge"/>
-    <img src="https://img.shields.io/badge/Photon_OSM-Geocodificación_en_Vivo-5C2D91?style=for-the-badge&logo=openstreetmap&logoColor=white" alt="Photon OSM Badge"/>
     <img src="https://img.shields.io/badge/Bandsintown-Live_Concerts_API-00B4D8?style=for-the-badge&logo=bandsintown&logoColor=white" alt="Bandsintown Badge"/>
 </p>
 <div align="center">
@@ -101,8 +100,8 @@
    </tr>
    <tr>
     <td><strong>Consumo de Datos (APIs en Vivo)</strong></td>
-    <td>OpenStreetMap (vía motor Photon) + Bandsintown Live REST API</td>
-    <td>Arquitectura multi-API REST en tiempo real (0% hardcoding). Unificación espacial por distancia geodésica (Haversine), filtro estricto de fechas a partir de hoy y enlaces a boletaría oficial.</td>
+    <td>OpenStreetMap / MusicBrainz Places API + Bandsintown Live REST API</td>
+    <td>Arquitectura multi-API REST en tiempo real (0% hardcoding). Unificación espacial por distancia geodésica (Haversine &le; 650m), deduplicación de promesas en vuelo, filtro estricto de fechas a partir de hoy y enlaces a boletaría oficial.</td>
    </tr>
    <tr>
     <td><strong>Despliegue Continuo (CI/CD)</strong></td>
@@ -230,7 +229,17 @@
     Este proyecto fue gestado y diseñado como <strong>Trabajo Práctico Integrador</strong> para la materia electiva <strong>Sistemas de Información Geográfica</strong> dictada en la <strong>Universidad Tecnológica Nacional, Facultad Regional Rosario (UTN FRRO) - Ingeniería en Sistemas de Información</strong>.
 </p>
 <p>
+    <strong>Comisión:</strong> 2EK02 | <strong>Fecha de Entrega:</strong> 29/10/2026<br/>
     <strong>Docentes a cargo:</strong> Ricagno Andrés, Ascolani Federico.
+</p>
+<p>
+    <strong>Integrantes del Proyecto:</strong>
+    <ul>
+        <li>Berrino, Nadia Belén – Legajo: 55372</li>
+        <li>Boveri, Rafaela – Legajo: 52077</li>
+        <li>Di Pentima, Maria Felicitas – Legajo: 53722</li>
+        <li>Santinelli, Agustín – Legajo: 52211</li>
+    </ul>
 </p>
 <p>
     La justificación, propuestas formales y apuntes del grupo están concentrados en <a href="https://drive.google.com/drive/folders/1aye4ekfo-Qra4-uXi6-KdhUuStWTFLUX?usp=sharing" target="_blank">nuestra carpeta de Google Drive compartida</a>.
