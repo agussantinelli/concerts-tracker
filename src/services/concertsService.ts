@@ -19,6 +19,60 @@ export function getDistanceMeters(lat1: number, lon1: number, lat2: number, lon2
 }
 
 /**
+ * Normaliza y traduce de forma determinística los tipos de recintos al español estándar
+ */
+export function translateVenueType(rawType?: string, name: string = ''): string {
+  const lowerName = name.toLowerCase();
+  if (lowerName.includes('anfiteatro')) return 'Anfiteatro';
+  if (lowerName.includes('estadio') || lowerName.includes('bielsa') || lowerName.includes('arroyito')) return 'Estadio';
+  if (lowerName.includes('teatro') || lowerName.includes('círculo') || lowerName.includes('circulo') || lowerName.includes('broadway') || lowerName.includes('astengo') || lowerName.includes('lavardén') || lowerName.includes('lavarden') || lowerName.includes('comedia')) return 'Teatro';
+  if (lowerName.includes('hipódromo') || lowerName.includes('hipodromo') || lowerName.includes('predio')) return 'Hipódromo / Predio';
+  if (lowerName.includes('arena') || lowerName.includes('metropolitano') || lowerName.includes('bioceres')) return 'Arena / Salón';
+  if (lowerName.includes('galpón') || lowerName.includes('galpon')) return 'Galpón Cultural';
+  if (lowerName.includes('parque de españa') || lowerName.includes('centro cultural')) return 'Centro Cultural';
+  if (lowerName.includes('fluvial')) return 'Espacio al Aire Libre';
+
+  const lowerType = (rawType || '').toLowerCase().trim();
+  switch (lowerType) {
+    case 'amphitheatre':
+    case 'amphitheater':
+      return 'Anfiteatro';
+    case 'venue':
+    case 'concert hall':
+    case 'concerthall':
+      return 'Sala de Conciertos';
+    case 'club':
+    case 'bar':
+      return 'Club Musical / Bar';
+    case 'theatre':
+    case 'theater':
+      return 'Teatro';
+    case 'stadium':
+      return 'Estadio';
+    case 'arena':
+      return 'Arena / Salón';
+    case 'studio':
+      return 'Estudio';
+    case 'stage':
+      return 'Escenario';
+    case 'arts centre':
+    case 'arts_centre':
+    case 'cultural centre':
+      return 'Centro Cultural';
+    case 'other':
+      return 'Espacio Cultural';
+    default:
+      if (lowerType.includes('amphi') || lowerType.includes('anfi')) return 'Anfiteatro';
+      if (lowerType.includes('theat') || lowerType.includes('teatr')) return 'Teatro';
+      if (lowerType.includes('stad') || lowerType.includes('estad')) return 'Estadio';
+      if (lowerType.includes('aren')) return 'Arena / Salón';
+      if (lowerType.includes('club') || lowerType.includes('bar')) return 'Club Musical / Bar';
+      if (lowerType.includes('cultur')) return 'Centro Cultural';
+      return 'Sala de Conciertos';
+  }
+}
+
+/**
  * Consulta en tiempo real las APIs públicas abiertas de geolocalización:
  * 1. MusicBrainz Places API (Recintos, salas de conciertos y teatros en Rosario con coordenadas exactas).
  * 2. OpenStreetMap Photon API (Geocodificación abierta de infraestructuras culturales de Rosario).
@@ -63,7 +117,7 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
       Promise.all(photonPromises)
     ]);
 
-    // Procesamiento dinámico de recintos en vivo de MusicBrainz
+    // Procesamiento dinámico de recintos en vivo de MusicBrainz con traducción garantizada al español
     const mbPlaces: any[] = Array.isArray(mbData.places) ? mbData.places : [];
     mbPlaces.forEach((p: any) => {
       if (p.coordinates?.latitude && p.coordinates?.longitude) {
@@ -75,7 +129,7 @@ export async function fetchLiveVenues(): Promise<{ venues: Venue[]; isLive: bool
             id: `mb-${p.id}`,
             name: p.name,
             address: p.address || 'Rosario, Santa Fe',
-            type: p.type || 'Sala de Conciertos',
+            type: translateVenueType(p.type, p.name),
             pos: [lat, lon],
             source: 'MusicBrainz'
           });

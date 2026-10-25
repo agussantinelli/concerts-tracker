@@ -297,41 +297,346 @@
   z-index: 0;
 }
 
+/* Custom Glassmorphism Map Popup - Modern & Spacious Design */
 .custom-popup .leaflet-popup-content-wrapper {
-  background: rgba(20, 10, 30, 0.95);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
+  background: rgba(18, 9, 32, 0.95) !important;
+  color: var(--text-main) !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  border-radius: 18px !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(138, 43, 226, 0.28) !important;
+  padding: 0 !important;
+  width: 380px !important;
+  max-width: 90vw !important;
+}
+
+.custom-popup .leaflet-popup-tip-container {
+  overflow: visible;
 }
 
 .custom-popup .leaflet-popup-tip {
-  background: rgba(20, 10, 30, 0.95);
-  border: 1px solid var(--border-color);
+  background: rgba(18, 9, 32, 0.95) !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6) !important;
+}
+
+.custom-popup a.leaflet-popup-close-button {
+  top: 14px !important;
+  right: 14px !important;
+  color: #cbd5e1 !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  width: 28px !important;
+  height: 28px !important;
+  line-height: 26px !important;
+  text-align: center !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  z-index: 10 !important;
+}
+
+.custom-popup a.leaflet-popup-close-button:hover {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  transform: rotate(90deg) scale(1.08) !important;
+}
+
+.custom-popup .leaflet-popup-content {
+  margin: 18px 20px !important;
+  width: auto !important;
+  max-height: 380px !important;
+  overflow-y: auto !important;
+  line-height: 1.4 !important;
+  padding-right: 4px !important;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb {
+  background: rgba(168, 85, 247, 0.4);
+  border-radius: 4px;
+}
+
+.custom-popup .leaflet-popup-content::-webkit-scrollbar-thumb:hover {
+  background: var(--violet-light);
+}
+
+.popup-inner-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.popup-header-block {
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+  padding-bottom: 12px;
+}
+
+.popup-venue-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-right: 32px;
+  margin-bottom: 8px;
+}
+
+.popup-venue-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(124, 58, 237, 0.45) 100%);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e9d5ff;
+  flex-shrink: 0;
+  margin-top: 1px;
 }
 
 .popup-venue-name {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: var(--violet-light);
-  margin-bottom: 8px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.2px;
 }
 
-.popup-event-item {
+.popup-tags-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 8px;
-  font-size: 0.9rem;
+  flex-wrap: wrap;
 }
 
-.popup-event-artist {
+.popup-venue-tag {
+  font-size: 0.72rem;
   font-weight: 600;
-  color: #fff;
+  color: #f3e8ff;
+  background: rgba(147, 51, 234, 0.25);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
-.popup-event-date {
-  color: var(--text-muted);
+.popup-source-tag {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.popup-venue-address {
   font-size: 0.8rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  line-height: 1.3;
+}
+
+.popup-section-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #c084fc;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.popup-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.popup-event-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.popup-event-card:hover {
+  background: rgba(147, 51, 234, 0.14);
+  border-color: rgba(168, 85, 247, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.popup-event-card.selected {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.35) 0%, rgba(88, 28, 135, 0.55) 100%) !important;
+  border: 1px solid #c084fc !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4) !important;
+}
+
+.popup-selected-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: linear-gradient(90deg, #9333ea, #7c3aed);
+  color: #ffffff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.popup-artist-name {
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 6px;
+  line-height: 1.25;
+}
+
+.popup-event-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.popup-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.popup-meta-icon {
+  color: var(--violet-light);
+  flex-shrink: 0;
+}
+
+.popup-event-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.popup-ticket-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  color: #ffffff !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
+  transition: all 0.2s ease;
+}
+
+.popup-ticket-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(147, 51, 234, 0.6);
+}
+
+.popup-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.popup-select-btn:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: var(--violet-light);
+  color: #ffffff;
+}
+
+.popup-select-btn.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.popup-select-btn.active:hover {
+  background: rgba(239, 68, 68, 0.4);
+  color: #ffffff;
+}
+
+.popup-empty-notice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(168, 85, 247, 0.3);
+}
+
+.popup-empty-icon-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(138, 43, 226, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c084fc;
+  flex-shrink: 0;
+}
+
+.popup-empty-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popup-empty-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.popup-empty-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.3;
 }
 
 
@@ -867,38 +1172,46 @@
     flex-shrink: 0 !important;
   }
 
-  /* Popup del mapa compacto para que no tape la vista cartográfica */
+  /* Popup del mapa en móvil: proporciones elegantes y bien legibles */
   .custom-popup .leaflet-popup-content-wrapper {
-    max-width: 240px !important;
-    padding: 2px 4px !important;
+    width: 310px !important;
+    max-width: 88vw !important;
+    border-radius: 14px !important;
   }
 
   .custom-popup .leaflet-popup-content {
-    margin: 6px 8px !important;
-    font-size: 0.78rem !important;
-    line-height: 1.25 !important;
+    margin: 12px 14px !important;
+    max-height: 260px !important;
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
   }
 
   .popup-venue-name {
-    font-size: 0.88rem !important;
-    margin-bottom: 3px !important;
-    padding-bottom: 2px !important;
+    font-size: 1rem !important;
   }
 
-  .popup-event-item {
-    margin-bottom: 4px !important;
-    font-size: 0.78rem !important;
+  .popup-venue-icon {
+    width: 26px !important;
+    height: 26px !important;
   }
 
-  .popup-event-selected {
-    padding: 4px 6px !important;
-    margin-bottom: 4px !important;
+  .popup-artist-name {
+    font-size: 0.96rem !important;
   }
 
-  .selected-tag-pill {
-    font-size: 0.58rem !important;
-    padding: 1px 4px !important;
-    margin-bottom: 2px !important;
+  .popup-event-card {
+    padding: 10px 12px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .popup-ticket-btn {
+    font-size: 0.72rem !important;
+    padding: 5px 9px !important;
+  }
+
+  .popup-select-btn {
+    font-size: 0.7rem !important;
+    padding: 4px 8px !important;
   }
 
   /* Tarjetas de eventos más compactas en móvil */

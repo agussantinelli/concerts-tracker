@@ -27,7 +27,7 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 
 import { Venue, ConcertEvent } from '../types';
-import { fetchLiveVenues, fetchLiveEvents } from '../services/concertsService';
+import { fetchLiveVenues, fetchLiveEvents, translateVenueType } from '../services/concertsService';
 
 const DefaultIcon = L.icon({
   iconUrl: icon,
@@ -204,10 +204,14 @@ function MapPage() {
   // Calcular la posición y nivel de zoom hacia donde debe animar el mapa
   const { targetPos, targetZoom } = useMemo(() => {
     if (selectedEventVenue) {
-      return { targetPos: selectedEventVenue.pos, targetZoom: 15 };
+      // Offset de latitud (+0.0065) hacia el norte para que el marcador quede en la mitad inferior
+      // y el popup (que abre hacia arriba) se vea entero y espacioso sin cortarse contra el borde superior del mapa
+      const [vLat, vLon] = selectedEventVenue.pos;
+      return { targetPos: [vLat + 0.0065, vLon] as [number, number], targetZoom: 15 };
     }
     if (selectedVenue) {
-      return { targetPos: selectedVenue.pos, targetZoom: 15 };
+      const [vLat, vLon] = selectedVenue.pos;
+      return { targetPos: [vLat + 0.0065, vLon] as [number, number], targetZoom: 15 };
     }
     return { targetPos: rosarioPosition, targetZoom: 13 };
   }, [selectedEventVenue, selectedVenue, rosarioPosition]);
@@ -330,7 +334,7 @@ function MapPage() {
                       >
                         <div className="option-name-wrapper">
                           <span className="option-name">{v.name}</span>
-                          {v.type && <span className="option-type-tag">{v.type}</span>}
+                          {v.type && <span className="option-type-tag">{translateVenueType(v.type, v.name)}</span>}
                         </div>
                         {venueFilter === v.id.toString() && <FaCheck size={11} color="var(--violet-light)" />}
                       </button>
@@ -427,7 +431,7 @@ function MapPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                       <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                         {venue?.type && (
-                          <span className="venue-tag">{venue.type}</span>
+                          <span className="venue-tag">{translateVenueType(venue.type, venue.name)}</span>
                         )}
                         {isSelected && (
                           <span className="card-selected-badge">
@@ -530,60 +534,116 @@ function MapPage() {
                   position={venue.pos}
                   ref={isSelectedVenue ? (ref) => { markerRef.current = ref; } : undefined}
                 >
-                  <Popup className="custom-popup">
-                    <div className="popup-venue-name">
-                      <FaMapMarkerAlt style={{ marginRight: '6px' }} /> {venue.name}
-                    </div>
-                    {venue.type && (
-                      <div style={{ marginBottom: '4px' }}>
-                        <span className="venue-tag">{venue.type}</span>
-                        <span className="source-badge bandsintown" style={{ marginLeft: '4px' }}>
-                          OpenStreetMap
-                        </span>
-                      </div>
-                    )}
-                    {venue.address && (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '8px' }}>
-                        <FaMapMarkerAlt size={11} style={{ marginRight: '4px', verticalAlign: 'middle', color: 'var(--violet-light)' }} /> {venue.address}
-                      </div>
-                    )}
-                    {venueEvents.length > 0 ? (
-                      venueEvents.map(ev => {
-                        const isThisConcertSelected = selectedEventId !== null && ev.id.toString() === selectedEventId.toString();
-                        return (
-                          <div 
-                            key={ev.id} 
-                            className={`popup-event-item ${isThisConcertSelected ? 'popup-event-selected' : ''}`}
-                          >
-                            {isThisConcertSelected && (
-                              <div className="selected-tag-pill">
-                                <FaCheck size={9} /> Concierto seleccionado
-                              </div>
-                            )}
-                            <div className="popup-event-artist">{ev.artist}</div>
-                            <div className="popup-event-date">
-                              {ev.date ? new Date(ev.date + 'T00:00:00').toLocaleDateString('es-AR') : ''} - {ev.genre}
-                            </div>
-                            {ev.ticketUrl && (
-                              <a 
-                                href={ev.ticketUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="ticket-link-btn"
-                                style={{ marginTop: '4px', display: 'inline-flex' }}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <FaTicketAlt size={10} /> Entradas <FaExternalLinkAlt size={8} />
-                              </a>
-                            )}
+                  <Popup 
+                    className="custom-popup"
+                    autoPan={true}
+                    autoPanPaddingTopLeft={[25, 95]}
+                    autoPanPaddingBottomRight={[25, 25]}
+                  >
+                    <div className="popup-inner-container">
+                      <div className="popup-header-block">
+                        <div className="popup-venue-title-row">
+                          <div className="popup-venue-icon">
+                            <FaMapMarkerAlt size={14} />
                           </div>
-                        );
-                      })
-                    ) : (
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                        Recinto oficial obtenido en tiempo real desde OpenStreetMap.
+                          <div className="popup-venue-name">{venue.name}</div>
+                        </div>
+                        <div className="popup-tags-row">
+                          {venue.type && (
+                            <span className="popup-venue-tag">{translateVenueType(venue.type, venue.name)}</span>
+                          )}
+                          <span className="popup-source-tag">
+                            {venue.source || 'OpenStreetMap'}
+                          </span>
+                        </div>
+                        {venue.address && (
+                          <div className="popup-venue-address">
+                            <FaMapMarkerAlt size={10} style={{ color: 'var(--violet-light)', flexShrink: 0 }} />
+                            <span>{venue.address}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                      <div className="popup-events-section">
+                        {venueEvents.length > 0 ? (
+                          <>
+                            <div className="popup-section-header">
+                              <FaMusic size={11} className="popup-section-icon" />
+                              <span>
+                                {venueEvents.length === 1 ? '1 Concierto próximo' : `${venueEvents.length} Conciertos próximos`}
+                              </span>
+                            </div>
+                            <div className="popup-events-list">
+                              {venueEvents.map(ev => {
+                                const isThisConcertSelected = selectedEventId !== null && ev.id.toString() === selectedEventId.toString();
+                                return (
+                                  <div 
+                                    key={ev.id} 
+                                    className={`popup-event-card ${isThisConcertSelected ? 'selected' : ''}`}
+                                    onClick={() => setSelectedEventId(isThisConcertSelected ? null : ev.id)}
+                                    title="Haz clic para seleccionar este recital"
+                                  >
+                                    {isThisConcertSelected && (
+                                      <div className="popup-selected-pill">
+                                        <FaCheck size={9} /> Concierto seleccionado
+                                      </div>
+                                    )}
+                                    <div className="popup-artist-name">{ev.artist}</div>
+                                    
+                                    <div className="popup-event-meta">
+                                      <div className="popup-meta-item">
+                                        <FaCalendarAlt size={11} className="popup-meta-icon" />
+                                        <span>{new Date(ev.date + 'T00:00:00').toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                                      </div>
+                                      {ev.genre && (
+                                        <div className="popup-meta-item">
+                                          <FaMusic size={11} className="popup-meta-icon" />
+                                          <span>{ev.genre}</span>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="popup-event-actions">
+                                      {ev.ticketUrl && (
+                                        <a 
+                                          href={ev.ticketUrl} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer" 
+                                          className="popup-ticket-btn"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          <FaTicketAlt size={11} /> Entradas oficiales <FaExternalLinkAlt size={8} />
+                                        </a>
+                                      )}
+                                      <button
+                                        type="button"
+                                        className={`popup-select-btn ${isThisConcertSelected ? 'active' : ''}`}
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setSelectedEventId(isThisConcertSelected ? null : ev.id);
+                                        }}
+                                      >
+                                        {isThisConcertSelected ? 'Desmarcar' : 'Ver detalle'}
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="popup-empty-notice">
+                            <div className="popup-empty-icon-box">
+                              <FaBroadcastTower size={15} />
+                            </div>
+                            <div className="popup-empty-content">
+                              <p className="popup-empty-title">Recinto Oficial Verificado</p>
+                              <p className="popup-empty-desc">Datos en tiempo real vía geoservicios. Sin conciertos confirmados por el momento.</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </Popup>
                 </Marker>
               );
