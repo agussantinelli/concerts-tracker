@@ -58,13 +58,6 @@
     <li><strong>Análisis de Alcance</strong>: Representación visual de giras y recorridos de diferentes artistas a nivel global o regional.</li>
 </ul>
 
-<p>
-    Toda la documentación extendida (Enunciado, Propuesta del TPI y futuras entregas) se encuentra en:
-    <a href="https://drive.google.com/drive/folders/1aye4ekfo-Qra4-uXi6-KdhUuStWTFLUX?usp=sharing" target="_blank">
-        Google Drive – Concerts Tracker
-    </a>.
-</p>
-
 <hr>
 
 <h2>⚙️ Stack Tecnológico</h2>
